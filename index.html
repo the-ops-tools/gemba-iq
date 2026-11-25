@@ -1,0 +1,1316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gemba IQ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+
+:root{color-scheme:light dark;
+--bg:light-dark(#eef0ee,#101519);--panel:light-dark(#ffffff,#182027);--ink:light-dark(#16202a,#e7ecef);--muted:light-dark(#566470,#9babb7);
+--line:light-dark(#d5dbdf,#2a343d);--acc:#f2b705;--accInk:#16202a;--steel:light-dark(#255b7e,#82b8da);
+--red:light-dark(#c63a2d,#ff7d6e);--amber:light-dark(#b97900,#ffc552);--green:light-dark(#2c8250,#62d394)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Barlow,system-ui,sans-serif;overflow-x:clip}
+h1,h2,h3{font-family:"Barlow Semi Condensed",Barlow,sans-serif;line-height:1.05;margin:0;text-wrap:balance}
+h1{font-size:clamp(30px,4.4vw,46px)}h2{font-size:22px}h3{font-size:18px}
+.band{padding:clamp(18px,3vw,36px) max(4vw,16px)}.band+.band{padding-top:0}.wrap{max-width:1240px;margin:0 auto}
+header{background:var(--ink);color:var(--bg);padding:10px max(4vw,16px);position:sticky;top:0;z-index:5}
+header .wrap{display:flex;flex-wrap:wrap;gap:8px 24px;align-items:center;justify-content:space-between}
+.brand{display:flex;gap:10px;align-items:center;font:700 22px "Barlow Semi Condensed",sans-serif}
+.brand small{font:400 14px Barlow,sans-serif;opacity:.75}
+nav{display:flex;flex-wrap:wrap;gap:6px}
+nav a{color:inherit;text-decoration:none;padding:10px 14px;border-radius:8px;font-weight:600;min-height:44px;display:inline-flex;align-items:center}
+nav a[aria-current=page]{background:var(--acc);color:var(--accInk)}
+:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+.sub{color:var(--muted);margin:8px 0 0;max-width:75ch}
+.grid{display:grid;gap:20px;grid-template-columns:minmax(0,1.45fr) minmax(0,1fr);align-items:start;margin-top:18px}
+.two{display:grid;gap:20px;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:start}
+.mt{margin-top:20px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px}
+.card>h2{margin-bottom:10px}
+.head{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-bottom:12px}
+.seg{display:flex;flex-wrap:wrap;gap:4px;padding:4px;border-radius:10px;background:color-mix(in srgb,var(--ink) 8%,transparent);width:fit-content;max-width:100%}
+.seg button{background:transparent;color:var(--muted);border:0;border-radius:8px;padding:6px 10px;font-size:15px;min-height:38px}
+.seg button[aria-pressed=true],.seg button[aria-selected=true]{background:var(--panel);color:var(--ink);box-shadow:0 1px 3px rgb(0 0 0/.18)}
+.seg .cnt{font-size:12px;margin-left:4px;padding:0 6px;border-radius:999px;background:color-mix(in srgb,var(--ink) 10%,transparent)}
+#map svg{display:block;width:100%;height:auto}
+.zone{cursor:pointer}.zone:focus-visible rect{stroke:var(--acc);stroke-width:6}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:10px;font-size:13px;color:var(--muted)}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.zh{display:flex;flex-wrap:wrap;gap:8px;align-items:baseline;justify-content:space-between}
+.pill{font-size:13px;font-weight:600;padding:2px 9px;border-radius:999px;white-space:nowrap;border:1px solid currentColor}
+.m4{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+.m4 div{border:1px solid var(--line);border-left:5px solid var(--c,var(--line));border-radius:8px;padding:8px 10px;font-size:14px}
+.m4 b{display:block;font:700 16px "Barlow Semi Condensed",sans-serif}
+.tl{list-style:none;margin:0;padding:0}.tl li{display:grid;grid-template-columns:46px 58px minmax(0,1fr);gap:8px;padding:7px 0;border-bottom:1px solid var(--line);font-size:14px}
+.src{font-size:11px;font-weight:700;padding:1px 6px;border-radius:5px;background:color-mix(in srgb,var(--steel) 15%,transparent);color:var(--steel);text-align:center;height:fit-content}
+.hbars{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:6px;align-items:end;height:130px;margin-top:8px}
+.hbars div{position:relative;height:100%;display:flex;align-items:flex-end;justify-content:center}
+.hbars span{display:block;width:70%;border-radius:4px 4px 0 0;background:var(--steel)}
+.hbars em{position:absolute;left:0;right:0;border-top:2px dashed var(--muted)}
+.hlab{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:6px;font-size:12px;color:var(--muted);text-align:center}
+.kv{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:6px 0 12px}
+.kv div{background:color-mix(in srgb,var(--ink) 5%,transparent);border-radius:8px;padding:8px}
+.kv b{display:block;font:700 20px "Barlow Semi Condensed",sans-serif;white-space:nowrap}.kv small{color:var(--muted);font-size:13px}
+.par{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,2fr) 34px;gap:8px;align-items:center;font-size:14px;margin:4px 0}
+.par i{display:block;height:12px;border-radius:4px;background:var(--red)}
+ol.rank{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.rank li{display:grid;grid-template-columns:38px minmax(0,1fr) 46px;gap:10px;align-items:start;padding:10px;border-radius:10px;border:1px solid var(--line);cursor:pointer}
+.rank li.sel{border-color:var(--acc);box-shadow:inset 4px 0 0 var(--acc)}
+.num{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font:700 17px "Barlow Semi Condensed",sans-serif;background:var(--acc);color:var(--accInk)}
+.score{font:700 24px "Barlow Semi Condensed",sans-serif;text-align:right}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.chip{font-size:13px;padding:2px 8px;border-radius:999px;background:color-mix(in srgb,var(--steel) 12%,transparent);white-space:nowrap}
+.hi{color:var(--red)}.mid{color:var(--amber)}.lo{color:var(--green)}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:0}
+label{display:block;font-weight:600;font-size:14px;margin:10px 0 4px}
+select,textarea,input{width:100%;font:16px Barlow,sans-serif;padding:10px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);min-height:44px}
+textarea{min-height:90px;resize:vertical}
+.row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+button{font:600 15px Barlow,sans-serif;min-height:44px;padding:8px 16px;border-radius:8px;border:1px solid var(--ink);background:var(--ink);color:var(--bg);cursor:pointer}
+button.ghost{background:transparent;color:var(--ink)}button:disabled{opacity:.5;cursor:default}
+.ai{display:none!important}.has-ai .ai{display:inline-flex!important}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.sugg{margin-top:14px;padding:14px;border-radius:10px;background:color-mix(in srgb,var(--acc) 14%,var(--panel));border:1px dashed var(--acc)}
+.sugg ol{margin:6px 0 0;padding-left:20px}
+.out{white-space:pre-wrap;margin-top:10px;font-size:15px}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th,td{text-align:left;padding:9px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:13px;color:var(--muted);font-weight:600}td.n,th.n{text-align:right;white-space:nowrap}
+tr.bn td{background:color-mix(in srgb,var(--red) 8%,transparent)}
+.heat td{text-align:center;font-weight:600;border:2px solid var(--panel)}.heat th:first-child,.heat td:first-child{text-align:left}
+.pat{border:1px solid var(--line);border-radius:10px;padding:12px;margin-top:10px;cursor:pointer}
+.pat.sel{border-color:var(--acc);box-shadow:inset 4px 0 0 var(--acc)}
+.tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.tiles .card b{display:block;font:700 40px/1 "Barlow Semi Condensed",sans-serif;margin-top:4px}
+.gantt{display:grid;gap:6px;margin-top:8px}
+.gr{display:grid;grid-template-columns:minmax(0,230px) minmax(0,1fr);gap:10px;align-items:center;font-size:14px}
+.gt{position:relative;height:26px;background:color-mix(in srgb,var(--ink) 5%,transparent);border-radius:6px}
+.gt i{position:absolute;top:3px;bottom:3px;border-radius:5px}
+.gt em{position:absolute;top:-4px;bottom:-4px;border-left:2px solid var(--acc)}
+.gr.dim{opacity:.45}
+.kb{display:grid;grid-template-columns:repeat(5,minmax(200px,1fr));gap:12px;overflow-x:auto;padding-bottom:6px}
+.col{background:color-mix(in srgb,var(--ink) 5%,transparent);border-radius:10px;padding:10px;min-height:160px}
+.col.over{outline:2px dashed var(--acc)}
+.col h3{font-size:16px;display:flex;justify-content:space-between;margin-bottom:8px}
+.kc{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px;margin-bottom:8px;font-size:14px;cursor:grab}
+.kc.hl{border-color:var(--acc);box-shadow:inset 4px 0 0 var(--acc)}
+.kc .mv{display:flex;justify-content:space-between;gap:6px;margin-top:8px}
+.kc .mv button{min-height:36px;padding:4px 10px;font-size:14px}
+.prog{height:8px;border-radius:5px;background:color-mix(in srgb,var(--ink) 10%,transparent);overflow:hidden;margin-top:6px}.prog i{display:block;height:100%;background:var(--green)}
+.big{font:700 clamp(64px,10vw,112px)/1 "Barlow Semi Condensed",sans-serif;letter-spacing:-.02em}
+.meter{margin-top:12px}.meter .bar{height:10px;background:color-mix(in srgb,var(--ink) 10%,transparent);border-radius:6px;overflow:hidden;margin-top:4px}
+.meter .bar i{display:block;height:100%;background:var(--steel)}
+.meter div:first-child{display:flex;justify-content:space-between;gap:8px;font-size:15px}
+.fig{position:relative;min-height:240px}.fig>svg{position:absolute;inset:0;width:100%;height:100%}
+.tag{font-size:12px;font-weight:600;padding:1px 7px;border-radius:5px;border:1px solid currentColor;white-space:nowrap}
+.note{font-size:13px;color:var(--muted)}.empty{color:var(--muted);font-style:italic}
+footer{padding:20px max(4vw,16px) 40px;color:var(--muted);font-size:14px}
+[hidden]{display:none!important}.scroll{overflow-x:auto}
+@media(max-width:900px){.grid,.two{grid-template-columns:minmax(0,1fr)}.tiles{grid-template-columns:repeat(2,minmax(0,1fr))}.gr{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:600px){table{font-size:13px}.stack thead{display:none}.stack tr{display:grid;padding-block:10px}.stack td{display:flow-root;border:0;padding:3px 0;padding-inline-start:8em;text-align:start}.stack td::before{content:attr(data-l);float:inline-start;width:7.5em;margin-inline-start:-8em;white-space:normal;color:var(--muted)}.stack td:empty{display:none}.row,.m4{grid-template-columns:minmax(0,1fr)}.kv{grid-template-columns:repeat(2,minmax(0,1fr))}header{position:static}}
+@media(prefers-reduced-motion:no-preference){.route{stroke-dasharray:10 8;animation:march 1.2s linear infinite}@keyframes march{to{stroke-dashoffset:-18}}}
+
+header{background:var(--ink);color:var(--bg);padding:6px max(3vw,10px);position:sticky;top:0;z-index:20}
+header .wrap{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:nowrap}
+.hleft{display:flex;gap:8px;align-items:center;min-width:0}
+#menuBtn{background:transparent;border:0;color:inherit;width:44px;height:44px;padding:0;display:grid;place-items:center;border-radius:10px}
+#menuBtn:hover,#menuBtn[aria-expanded=true]{background:rgb(255 255 255/.12)}
+.where{font-size:14px;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rolepill{background:var(--acc);color:var(--accInk);font-weight:700;font-size:13px;padding:6px 10px;border-radius:999px;white-space:nowrap;border:0;min-height:32px}
+#menu{display:block;position:fixed;top:58px;left:max(3vw,10px);width:min(340px,calc(100vw - 20px));max-height:calc(100dvh - 72px);overflow:auto;background:var(--panel);color:var(--ink);border-radius:16px;box-shadow:0 12px 40px rgb(0 0 0/.28);padding:8px;z-index:30}
+#menu .grp{padding:6px 0;border-bottom:1px solid var(--line)}#menu .grp:last-child{border-bottom:0}
+#menu .roles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;padding:6px}
+#menu .roles button{background:color-mix(in srgb,var(--ink) 7%,transparent);color:var(--ink);border:0;border-radius:12px;padding:8px 4px;font-size:14px;min-height:48px}
+#menu .roles button[aria-checked=true]{background:color-mix(in srgb,var(--acc) 35%,var(--panel));box-shadow:inset 0 0 0 2px var(--acc)}
+#menu .who{font-size:13px;color:var(--muted);padding:4px 10px 0}
+#menu a{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:12px;align-items:center;padding:0 12px;min-height:48px;border-radius:10px;color:var(--ink);text-decoration:none;font-size:16px}
+#menu a:hover,#menu a:focus-visible{background:color-mix(in srgb,var(--ink) 7%,transparent);outline:none}
+#menu a[aria-current=page]{background:color-mix(in srgb,var(--acc) 22%,var(--panel));font-weight:600}
+#menu a small{color:var(--muted);font-size:13px}
+#menu svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+#scrim{position:fixed;inset:0;z-index:25;background:rgb(0 0 0/.12)}
+.today{margin-top:16px}.today h1{font-size:clamp(24px,3.4vw,36px)}
+.sec>.wrap>.card:first-child,.sec>.wrap>.grid:first-child{margin-top:0}
+@media(max-width:480px){.brand span{display:none}.where{font-size:15px;font-weight:600;opacity:1}}
+@media(max-width:600px){#zone .seg{flex-wrap:nowrap;overflow-x:auto}#zone .seg button{flex:none}#layers,#e-kbsel{flex-wrap:nowrap;overflow-x:auto}#layers button,#e-kbsel button{flex:none}h2{font-size:20px}.card{padding:14px}.band{padding:12px 10px}.today h1{font-size:23px}}
+
+#infoBtn{background:transparent;border:0;color:inherit;width:44px;height:44px;padding:0;display:grid;place-items:center;border-radius:10px}
+#infoBtn:hover{background:rgb(255 255 255/.12)}
+.info p,.info li{max-width:75ch}.info h3{margin:14px 0 4px}
+.info .chips button{min-height:38px;padding:4px 12px;font-size:14px;border-radius:999px}
+.defs{display:grid;grid-template-columns:minmax(0,220px) minmax(0,1fr);gap:8px 18px;margin:8px 0 0}
+.defs dt{font-weight:600}.defs dd{margin:0;color:var(--ink)}
+details.card>summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center}
+details.card>summary::-webkit-details-marker{display:none}
+details.card>summary::after{content:"+";font:700 24px Barlow,sans-serif;color:var(--muted)}
+details.card[open]>summary::after{content:"–"}
+details.card[open]>summary{margin-bottom:6px}
+@media(max-width:600px){.defs{grid-template-columns:minmax(0,1fr);gap:2px}.defs dd{margin-bottom:10px}}
+html{scroll-padding-top:72px}
+
+.btnlike{display:inline-flex;align-items:center;gap:8px;font:600 15px Barlow,sans-serif;min-height:44px;padding:8px 14px;border-radius:8px;border:1px solid var(--ink);color:var(--ink);cursor:pointer;margin:0}
+.btnlike:focus-within{outline:3px solid var(--acc);outline-offset:2px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.thumbs{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.thumbs .th,.thw{position:relative;width:72px;height:72px;padding:0;border-radius:8px;overflow:hidden;border:1px solid var(--line);background:var(--bg);min-height:0}
+.thumbs .th.sm{width:52px;height:52px}
+.thumbs img,.thw img{width:100%;height:100%;object-fit:cover;display:block}
+.thumbs .t{position:absolute;left:3px;bottom:3px;font-size:10px;font-weight:600;background:rgb(0 0 0/.62);color:#fff;padding:0 4px;border-radius:3px}
+.thw .x{position:absolute;top:2px;right:2px;min-height:0;width:24px;height:24px;padding:0;border-radius:50%;font-size:12px;background:rgb(0 0 0/.65);border:0;color:#fff}
+#lb{position:fixed;inset:0;z-index:40;background:rgb(10 14 18/.92);color:#fff;display:grid;grid-template-rows:auto minmax(0,1fr) auto auto;padding:10px;gap:8px}
+#lb img{max-width:100%;max-height:100%;margin:auto;object-fit:contain;border-radius:6px}
+#lb .lbbar{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:14px}
+#lb button{color:#fff;border-color:rgb(255 255 255/.6)}#lb .lbcap{margin:0;text-align:center;font-size:15px}
+#lb .lbnav{display:flex;justify-content:center;gap:16px}
+#toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;z-index:50;font-size:15px;max-width:calc(100vw - 24px);box-shadow:0 6px 20px rgb(0 0 0/.25)}
+#menu .pv{font-size:11px;font-weight:700;padding:1px 6px;border-radius:5px;background:color-mix(in srgb,var(--acc) 35%,transparent);color:var(--ink);margin-left:4px}
+
+.themes{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px}
+.themes button{display:grid;gap:2px;text-align:start;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-weight:500}
+.themes button b{font:700 17px "Barlow Semi Condensed",Barlow,sans-serif}.themes button small{color:var(--muted);font-size:13px}.themes .tag{justify-self:start}
+.themes button[aria-checked=true]{border-color:var(--acc);box-shadow:inset 0 0 0 2px var(--acc)}
+.brief{margin-top:14px;padding:12px 14px;border-radius:10px;background:color-mix(in srgb,var(--steel) 8%,var(--panel));border:1px solid var(--line)}.brief ol{margin:6px 0 0;padding-left:20px}.brief li{margin-bottom:4px}
+.steps{list-style:none;margin:0 0 14px;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.steps button{width:100%;display:flex;gap:6px;align-items:center;justify-content:center;background:transparent;color:var(--muted);border:1px solid var(--line);font-weight:600;padding:6px 4px;font-size:14px}
+.steps button span{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:color-mix(in srgb,var(--ink) 10%,transparent);font-size:12px;flex:none}
+.steps button.done{color:var(--ink)}.steps button.done span{background:var(--green);color:#fff}
+.steps button[aria-current=step]{color:var(--accInk);background:var(--acc);border-color:var(--acc)}.steps button[aria-current=step] span{background:var(--accInk);color:var(--acc)}
+.chk{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.chk li{padding:10px 12px;border:1px solid var(--line);border-radius:10px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 12px;align-items:center}
+.chk li.no{border-color:var(--red);box-shadow:inset 4px 0 0 var(--red)}.chk .nofix{grid-column:1/-1}
+.chk .seg button[data-v=y][aria-pressed=true]{background:var(--green);color:#fff}.chk .seg button[data-v=n][aria-pressed=true]{background:var(--red);color:#fff}
+label.ck{display:flex;gap:8px;align-items:center;font-weight:500;margin-top:12px}label.ck input{width:20px;height:20px;min-height:0;flex:none;accent-color:var(--steel)}
+.guard{margin-top:8px;padding:10px 12px;border-radius:8px;border:1px solid var(--amber);background:color-mix(in srgb,var(--amber) 12%,var(--panel));font-size:14px}
+.asks{font-size:14px;margin-bottom:4px}.asks .chip{display:inline-block;margin:4px 4px 0 0;white-space:normal}
+.olist{margin:6px 0 0;padding:0;list-style:none;display:grid;gap:6px}.olist li{padding:8px 0;border-bottom:1px solid var(--line)}
+.tag.hi{color:var(--red)}.tag.mid{color:var(--amber)}.tag.lo{color:var(--green)}.tag.st{color:var(--steel)}
+button.linkb{background:none;border:0;color:var(--steel);padding:0;min-height:0;font:600 14px Barlow,sans-serif;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.rank li .linkb{margin-top:8px;min-height:32px}
+.clock{font:700 clamp(44px,9vw,64px)/1 "Barlow Semi Condensed",Barlow,sans-serif;font-variant-numeric:tabular-nums;margin:10px 0 4px}
+.gstd{display:grid;gap:6px}.gstd div{display:grid;grid-template-columns:56px minmax(0,1fr);gap:8px}.gstd b{font-family:"Barlow Semi Condensed",Barlow,sans-serif;color:var(--steel)}
+details.gr{margin-top:6px;font-size:14px}details.gr summary{cursor:pointer;color:var(--muted);display:flex;gap:8px;align-items:center;list-style:none;min-height:32px}details.gr summary::-webkit-details-marker{display:none}
+.dots{display:inline-flex;gap:3px}.dots i{width:10px;height:10px;border-radius:3px;background:color-mix(in srgb,var(--ink) 14%,transparent)}.dots i.on{background:var(--acc)}.dots.full i{background:var(--green)}
+.grl{margin:4px 0 6px;padding-left:20px}.grl li{color:var(--muted)}.grl li.on b{color:var(--amber)}.grl.full li b{color:var(--green)}.grl li b{color:var(--ink)}
+details.gr input:not([type=checkbox]){min-height:40px;padding:8px}
+.kboard{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:14px}
+.kday{padding:10px;border-radius:10px;background:color-mix(in srgb,var(--ink) 5%,transparent);display:grid;gap:8px;align-content:start}.kday.now{box-shadow:inset 0 0 0 2px var(--acc)}.kday h3{font-size:16px}
+.kcard{display:grid;gap:2px;text-align:start;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-left:6px solid var(--muted);border-radius:8px;padding:8px 10px;font-weight:500}
+.kcard b{font:700 16px "Barlow Semi Condensed",Barlow,sans-serif}.kcard span{font-size:13px;color:var(--muted)}.kcard em{font-style:normal;font-size:13px;font-weight:600}
+.kcard.done{border-left-color:var(--green)}.kcard.done em{color:var(--green)}.kcard.missed{border-left-color:var(--red)}.kcard.missed em{color:var(--red)}.kcard.due{border-left-color:var(--acc)}
+.hlist{list-style:none;margin:0;padding:0;display:grid;gap:6px}.hlist button{width:100%;display:flex;justify-content:space-between;gap:10px;align-items:center;text-align:start;background:transparent;color:var(--ink);border:1px solid var(--line);font-weight:500;padding:8px 12px}.hlist button.sel{border-color:var(--acc)}.hlist small{display:block;color:var(--muted);font-size:13px}.hlist strong{font:700 18px 'Barlow Semi Condensed',Barlow,sans-serif}.kcard:disabled{opacity:.7}
+#printzone{display:none}
+@media print{body.printing>*:not(#printzone){display:none!important}body.printing #printzone{display:block}#printzone .card{box-shadow:none;border:0;max-width:none}body.printing{background:#fff;color:#000}}
+@media(max-width:600px){.steps{grid-template-columns:repeat(2,minmax(0,1fr))}.chk li{grid-template-columns:minmax(0,1fr)}}
+
+
+#menuBtn,#infoBtn{flex:none}
+#bnav{display:none}
+.qprog{display:flex;justify-content:space-between;gap:8px;font-size:15px;color:var(--muted)}
+.qnav{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.qnav button{min-width:48px;min-height:48px;padding:0;background:transparent;color:var(--ink);border:1px solid var(--line);border-radius:10px}
+.qnav button.ok{border-color:var(--green);color:var(--green)}.qnav button.no{border-color:var(--red);color:var(--red)}
+.qnav button[aria-current=step]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.qbig{font:700 24px/1.2 "Barlow Semi Condensed",Barlow,sans-serif;margin:18px 0;min-height:3.6em}
+.yn{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.yn button{min-height:72px;font-size:20px;background:var(--panel);color:var(--ink);border:2px solid var(--line);border-radius:14px}
+.yn button[data-v=y][aria-pressed=true]{background:var(--green);border-color:var(--green);color:#fff}
+.yn button[data-v=n][aria-pressed=true]{background:var(--red);border-color:var(--red);color:#fff}
+.yn button[data-v=na][aria-pressed=true]{background:var(--muted);border-color:var(--muted);color:#fff}
+button.wide{width:100%;min-height:56px;font-size:17px}
+button.lap{width:100%;min-height:96px;font-size:24px;border-radius:16px;background:var(--acc);color:var(--accInk);border-color:var(--acc)}
+.qsum{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:6px}.qsum button{width:100%;display:flex;justify-content:space-between;gap:10px;text-align:start;background:transparent;color:var(--ink);border:1px solid var(--line);font-weight:500}
+@media(max-width:760px){
+ body{padding-bottom:calc(76px + env(safe-area-inset-bottom))}
+ #bnav{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));position:fixed;left:0;right:0;bottom:0;z-index:22;background:var(--panel);border-top:1px solid var(--line);padding:6px 4px calc(6px + env(safe-area-inset-bottom));box-shadow:0 -4px 16px rgb(0 0 0/.08)}
+ #bnav a,#bnav button{display:grid;justify-items:center;align-content:center;gap:2px;min-height:56px;padding:2px 0;background:transparent;border:0;border-radius:12px;color:var(--muted);text-decoration:none;font:600 12.5px Barlow,sans-serif;position:relative}
+ #bnav svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+ #bnav [aria-current=page]{color:var(--ink)}#bnav [aria-current=page] svg{background:color-mix(in srgb,var(--acc) 40%,transparent);border-radius:999px;width:48px;padding:0 12px;box-sizing:border-box}
+ #bnav .plus svg{width:52px;height:52px;padding:12px;margin-top:-22px;border-radius:50%;background:#1f4e8c;color:#fff;stroke:#fff;box-shadow:0 4px 12px rgb(0 0 0/.25)}#bnav .plus[aria-current=page] svg{width:52px;padding:12px;background:#163a6b;border-radius:50%;box-shadow:0 0 0 3px color-mix(in srgb,#1f4e8c 35%,transparent),0 4px 12px rgb(0 0 0/.25)}
+ #bnav .plus{color:#1f4e8c;font-weight:800;font-size:14.5px;letter-spacing:.2px}#bnav .plus svg{stroke-width:2.8}
+ #bnav .bdg{position:absolute;top:2px;left:calc(50% + 6px);min-width:20px;height:20px;padding:0 5px;border-radius:999px;background:var(--red);color:#fff;font-size:12px;line-height:20px}
+ body.walking #bnav{display:none}
+ #menu{top:auto;bottom:0;left:0;width:100%;max-height:85dvh;border-radius:18px 18px 0 0;padding-bottom:calc(10px + env(safe-area-inset-bottom))}
+ #toast{bottom:calc(84px + env(safe-area-inset-bottom))}
+ body.walking #toast{bottom:calc(92px + env(safe-area-inset-bottom))}
+ .wbar{position:fixed;left:0;right:0;bottom:0;z-index:22;margin:0!important;background:var(--panel);border-top:1px solid var(--line);padding:10px 12px calc(10px + env(safe-area-inset-bottom));box-shadow:0 -4px 16px rgb(0 0 0/.1);display:grid!important;grid-template-columns:1fr 2fr;gap:10px}
+ .wbar button{min-height:56px;font-size:17px}.wbar.one{grid-template-columns:1fr}
+ button,select,input:not([type=checkbox]):not([type=radio]):not([type=file]),textarea,.btnlike{min-height:48px}
+ .seg{gap:6px}.seg button{min-height:48px;padding:6px 12px}
+ .kc .mv button{min-height:48px;min-width:48px}
+ button.linkb{min-height:44px;display:inline-flex;align-items:center;padding:0 2px}
+ label.ck{min-height:48px;margin-top:6px}label.ck input{width:24px;height:24px}
+ details summary,details.gr summary{min-height:48px}
+ .info .chips button{min-height:44px}
+ .rolepill{min-height:44px;padding:6px 12px}
+ .note,.chip,.tag,small,.kcard span,.kcard em,table,.hlist small,#menu a small,#menu .who{font-size:14px}
+ .chips{gap:8px}
+}
+
+
+.hweek{margin-bottom:12px}.hweek a.linkb{color:var(--steel);font:600 15px Barlow,sans-serif;text-underline-offset:3px;min-height:44px;display:inline-flex;align-items:center}
+.wk{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px}
+.wkd{display:grid;gap:5px;align-content:start;padding:4px;border-radius:10px}
+.wkd>b{text-align:center;font:700 15px "Barlow Semi Condensed",Barlow,sans-serif}.wkd.now{background:color-mix(in srgb,var(--acc) 18%,transparent);box-shadow:inset 0 0 0 2px var(--acc)}
+.wkc{display:grid;justify-items:center;gap:0;min-height:48px;padding:4px 2px;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-top:4px solid var(--muted);border-radius:8px;font:700 14px "Barlow Semi Condensed",Barlow,sans-serif}
+.wkc span{white-space:nowrap;overflow:hidden;text-overflow:clip;max-width:100%}.wkc small{font:600 13px Barlow,sans-serif;color:var(--muted)}
+.wkc.done{border-top-color:var(--green)}.wkc.done small{color:var(--green)}.wkc.missed{border-top-color:var(--red)}.wkc.missed small{color:var(--red)}.wkc.due{border-top-color:var(--acc)}.wkc:disabled{opacity:.65}
+.tiles+.hfocus{margin-bottom:12px}
+.hkpi a.hk-wide{grid-column:1/-1}.hkpi a.hk-wide b{font-size:20px}
+#hist-rep .rep{margin-bottom:0}
+.ptag{display:inline-block;font:700 12.5px Barlow,sans-serif;padding:2px 8px;border-radius:999px;color:#fff;margin-right:4px;vertical-align:1px}.ptag.hi{background:var(--red)}.ptag.mid{background:var(--amber)}.ptag.lo{background:var(--green)}
+.arole{display:block;font-size:13px;color:var(--muted)}.arole.hi{color:var(--red);font-weight:600}
+.aedit{margin:8px 0 10px;padding:10px;border-radius:10px;background:color-mix(in srgb,var(--ink) 5%,transparent)}.aedit label:first-child{margin-top:0}
+
+:root{--c1:light-dark(#2563b0,#4f8ee0);--c2:light-dark(#c63a2d,#ef5e4f);--cmute:light-dark(#b9c2c9,#3d4a55)}
+#ad .head{display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center}
+.adk{grid-template-columns:repeat(5,minmax(0,1fr));margin:12px 0}.adk small small{font-size:13px}
+#ad-chart{margin-top:12px}#ad-chart svg{display:block;max-width:100%;overflow:visible}
+#ad-chart .ax{font:500 13px Barlow,sans-serif;fill:var(--muted)}#ad-chart .val{font:600 14px Barlow,sans-serif;fill:var(--ink)}
+#ad-chart .grid{fill:none;stroke:var(--line);stroke-width:1}#ad-chart .base{stroke:var(--line);stroke-width:1}
+#ad-chart .hit:hover rect:first-child,#ad-chart .hit:focus rect:first-child{fill:color-mix(in srgb,var(--ink) 5%,transparent)}
+.adleg{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:8px;font-size:14px}.adleg span{display:inline-flex;align-items:center;gap:6px}.adleg i{width:12px;height:12px;border-radius:3px;display:inline-block}
+details.dt{margin-top:8px;font-size:14px}details.dt summary{cursor:pointer;color:var(--steel);min-height:40px;display:flex;align-items:center}
+#ctip{position:fixed;z-index:60;background:var(--ink);color:var(--bg);padding:6px 10px;border-radius:8px;font-size:14px;pointer-events:none;max-width:260px;box-shadow:0 4px 14px rgb(0 0 0/.25)}
+#ap-filter{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:4px 0 8px;padding:8px 10px;border-radius:10px;background:color-mix(in srgb,var(--c1) 10%,var(--panel));font-size:15px}#ap-filter button{min-height:40px;padding:4px 12px}
+@media(max-width:760px){.adk{grid-template-columns:repeat(2,minmax(0,1fr))}.adk div:first-child{grid-column:1/-1}#ad-tabs{width:100%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}#ad-tabs button{padding:6px 4px;font-size:14px}}
+.alist{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,340px),1fr));gap:12px;margin-top:6px}
+.acard{border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--panel);display:grid;gap:8px;align-content:start}
+.ahead{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.aarea{font:700 17px "Barlow Semi Condensed",Barlow,sans-serif}
+.atext{margin:0;font-size:16px}.alab{font-size:13px;color:var(--muted);margin-bottom:-4px}
+.ameta{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0;padding:10px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.ameta dt{font-size:13px;color:var(--muted)}.ameta dd{margin:2px 0 0}
+.acard details.gr{margin:0}.aact{display:flex;gap:8px;flex-wrap:wrap}.aact .btnlike{display:inline-flex;gap:6px;align-items:center}
+.ov{display:flex;flex-wrap:nowrap;gap:16px 24px;align-items:center}.ov svg{flex:none}
+#ad-chart .ovn{font:700 34px "Barlow Semi Condensed",Barlow,sans-serif;fill:var(--ink)}
+.ovl{list-style:none;margin:0;padding:0;display:grid;gap:6px;flex:0 1 240px;min-width:0}
+.ovl button{width:100%;display:grid;grid-template-columns:14px minmax(0,1fr) auto 48px;gap:10px;align-items:center;text-align:start;background:transparent;color:var(--ink);border:1px solid var(--line);font-weight:500;padding:8px 12px}
+.ovl i{width:14px;height:14px;border-radius:4px}.ovl small{display:block;color:var(--muted);font-size:13px}.ovl strong{font:700 20px "Barlow Semi Condensed",Barlow,sans-serif}.ovl em{font-style:normal;color:var(--muted);text-align:end}.ovp{display:none}
+@media(max-width:560px){.ov{gap:8px}.ovl{flex:0 1 156px}.ovl button{grid-template-columns:12px minmax(0,1fr) auto;gap:8px;padding:6px 8px;min-height:48px}.ovl i{width:12px;height:12px}.ovl em{display:none}.ovp{display:inline}.ovl strong{font-size:18px}}
+#ad .head{flex-direction:column;align-items:stretch}.adh{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;width:100%}.adbs{display:flex;gap:8px;flex:1;min-width:0}.adb.push{margin-left:auto}.adb{white-space:nowrap;flex:none}@media(max-width:520px){.adbs{flex-basis:100%}}.adb.bl b{color:var(--c1)}
+.adb{display:inline-flex;align-items:baseline;gap:5px;padding:4px 12px;border-radius:999px;font-size:14px;color:var(--muted);background:color-mix(in srgb,var(--ink) 6%,transparent)}
+.adb b{font:700 20px "Barlow Semi Condensed",Barlow,sans-serif}.adb.hi b{color:var(--red)}.adb.mid b{color:var(--amber)}.adb.lo b{color:var(--green)}
+#ad-tabs{margin-top:4px}
+
+.hero{margin-bottom:12px}.hero .note{margin:0 0 10px}
+.hroles{width:100%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}.hroles button{min-height:48px}
+.hroles button[aria-checked=true]{background:var(--panel);color:var(--ink);box-shadow:0 1px 3px rgb(0 0 0/.18),inset 0 -3px 0 var(--acc)}
+.hfocus h2{margin-top:8px;font-size:clamp(22px,3vw,30px)}
+a.btnlike.solid{display:inline-flex;align-items:center;min-height:48px;padding:8px 18px;border-radius:8px;background:var(--ink);color:var(--bg);text-decoration:none;font-weight:600}
+.tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:12px 0}
+.tile{display:grid;gap:4px;align-content:start;min-height:120px;padding:16px;border-radius:14px;background:var(--panel);border:1px solid var(--line);color:var(--ink);text-decoration:none}
+.tile svg{width:30px;height:30px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;margin-bottom:6px}
+.tile b{font:700 19px/1.1 "Barlow Semi Condensed",Barlow,sans-serif}.tile small{color:var(--muted);font-size:14px}
+.tile.acc{background:var(--acc);border-color:var(--acc);color:var(--accInk)}.tile.acc small{color:var(--accInk);opacity:.8}
+.hkpi{margin:0 0 12px}.hkpi a{display:grid;gap:2px;padding:10px 12px;border-radius:10px;background:var(--panel);border:1px solid var(--line);color:var(--ink);text-decoration:none;min-height:64px}
+.hlinks{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:4px 16px;margin-top:8px}
+.hlinks a{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:12px;align-items:center;min-height:52px;padding:0 8px;border-bottom:1px solid var(--line);color:var(--ink);text-decoration:none;font-size:16px}
+.hlinks svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.hlinks small{color:var(--muted);font-size:14px}
+@media(max-width:760px){.tiles{grid-template-columns:repeat(2,minmax(0,1fr))}#menuBtn,.where{display:none!important}.brand span{display:inline!important}}
+</style><script>new MutationObserver(()=>{for(const c of document.querySelectorAll('.stack td:not([data-l])')){let i=0,p=c;while(p=p.previousElementSibling)i+=p.colSpan;c.dataset.l=c.closest('table').rows[0].cells[i]?.textContent||''}}).observe(document,{childList:true,subtree:true})</script>
+</head>
+<body>
+<header><div class="wrap">
+  <div class="hleft">
+    <button id="menuBtn" aria-label="Open menu" aria-haspopup="true" aria-expanded="false" aria-controls="menu"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+    <div class="brand"><svg width="28" height="28" viewBox="0 0 30 30" aria-hidden="true"><rect x="1" y="1" width="28" height="28" rx="6" fill="#f2b705"/><path d="M8 15a7 7 0 1 1 7 7" fill="none" stroke="#16202a" stroke-width="3.2" stroke-linecap="round"/><circle cx="15" cy="15" r="2.6" fill="#16202a"/></svg><span>Gemba IQ</span></div>
+    <span class="where" id="where"></span>
+  </div>
+  <div style="display:flex;gap:6px;align-items:center"><button id="infoBtn" aria-label="About and help" title="About and help"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9.5"/><path d="M12 16.5v-5M12 7.5h.01"/></svg></button><button class="rolepill" id="rolePill" aria-label="Change role"></button></div>
+</div></header>
+<div id="scrim" hidden></div>
+<nav id="menu" aria-label="Sections" hidden></nav>
+
+<main>
+<section class="band sec" data-role="all" data-sec="home" hidden><div class="wrap" id="home"></div></section>
+<section class="band sec" data-role="all" data-sec="map" hidden><div class="wrap">
+  <div class="grid" style="margin-top:0">
+    <div class="card">
+      <div class="head"><h2>Plant map</h2><div class="seg" id="layers" role="group" aria-label="Map layer"></div></div>
+      <div id="map"></div>
+      <div class="legend" id="legend"></div>
+    </div>
+    <aside class="card" id="zone" aria-live="polite"></aside>
+  </div>
+  <div class="card today"><h1 id="title">Gemba IQ</h1><p class="sub" id="sub"></p></div>
+</div></section>
+
+<section class="band sec" data-role="all" data-sec="gwalk" hidden><div class="wrap">
+  <div id="gw"></div>
+</div></section>
+<section class="band sec" data-role="all" data-sec="history" hidden><div class="wrap">
+  <div id="hist-rep" hidden></div>
+  <div class="card mt" style="max-width:820px"><h2>Walk history, last 14 days</h2><p class="note" style="margin:4px 0 6px">Tap a walk to open its report.</p><div class="scroll" id="gw-hist"></div></div>
+</div></section>
+<section class="band sec" data-role="all" data-sec="sched" hidden><div class="wrap">
+  <div class="card"><h2>Walk schedule (Kamishibai)</h2><p class="note" style="margin:4px 0 10px">Leader standard work: who walks which sector each day. Green = done, red = missed, yellow = due today. Tap a card to start that walk or to open its report.</p><div id="sc-sum"></div><div class="kboard" id="sc-board"></div></div>
+</div></section>
+<section class="band sec" data-role="supervisor" data-sec="4m" hidden><div class="wrap">
+  <div class="card"><h2>4M board: where the flow is stuck</h2><p class="note" style="margin:0 0 6px">Man · Machine · Material · Method per sector, with cycle time against takt (48 s). Tap a row to open the sector on the map.</p><div class="scroll"><table class="stack" id="s-4m"></table></div></div>
+</div></section>
+<section class="band sec" data-role="supervisor" data-sec="walk" hidden><div class="wrap">
+  <div class="card"><h2>Walk plan for today</h2><ol class="rank" id="s-rank"></ol></div>
+</div></section>
+<section class="band sec" data-role="all" data-sec="capture" hidden><div class="wrap">
+  <div class="card" style="max-width:720px">
+    <h2>Capture an observation</h2>
+    <form id="cap">
+      <div class="row"><div><label for="c-area">Area</label><select id="c-area"></select></div>
+      <div><label for="c-shift">Shift</label><select id="c-shift"><option>A</option><option>B</option><option>C</option></select></div></div>
+      <label>Type</label><div class="seg" id="c-kind" role="group" aria-label="Observation type"></div>
+      <label for="c-text">What did you see?</label>
+      <textarea id="c-text" placeholder="e.g. Operator waits for parts after the variant change"></textarea>
+      <div class="guard" id="c-guard" hidden></div>
+      <label>Photos of the problem</label>
+      <div class="btns" style="margin-top:0">
+        <label class="ghost btnlike" for="c-cam"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>Take photo</label>
+        <input type="file" id="c-cam" accept="image/*" capture="environment" hidden>
+        <label class="ghost btnlike" for="c-gal"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><rect x="4" y="5" width="16" height="14" rx="2"/><path d="M4 16l5-5 4 4 3-3 4 4"/></svg>From gallery</label>
+        <input type="file" id="c-gal" accept="image/*" multiple hidden>
+        <span class="note" id="c-phs" role="status"></span>
+      </div>
+      <div class="thumbs" id="c-ph"></div>
+      <div class="btns"><button type="submit">Analyse</button></div>
+    </form>
+    <div id="c-sugg" class="sugg" hidden></div>
+  </div>
+  <div class="card mt" style="max-width:720px"><h2>Good practice &amp; ideas</h2><div id="c-notes"></div></div>
+</div></section>
+<section class="band sec" data-role="all" data-sec="actions" hidden><div class="wrap">
+  <div class="card" id="ad"><div class="head"><div class="adh"><h2>Action dashboard</h2><div class="adbs" id="ad-kpi"></div></div><div class="seg" id="ad-tabs" role="tablist" aria-label="Chart"></div></div><div id="ad-chart"></div></div>
+  <div class="card mt"><div class="head"><h2>Action plan</h2><div class="seg" id="ap-seg" role="group" aria-label="Show actions"></div></div><p class="note" style="margin:0 0 6px">Sorted by priority (High first), then by due date. Each action has a responsible person and a due date; tap <strong>Golden rules · Edit</strong> on a card to change the priority, the person or the date.</p><div id="ap-filter" role="status" hidden></div><div id="s-actions" class="alist"></div></div>
+</div></section>
+
+<section class="band sec" data-role="engineer" data-sec="dash" hidden><div class="wrap">
+  <h2 style="margin-bottom:12px">Improvement dashboard</h2><div class="tiles" id="e-kpis"></div>
+</div></section>
+<section class="band sec" data-role="engineer" data-sec="timeline" hidden><div class="wrap">
+  <div class="card"><div class="head"><h2>Improvement timeline</h2><div class="seg" id="e-scope" role="group" aria-label="Timeline scope"></div></div><div id="e-gantt"></div></div>
+</div></section>
+<section class="band sec" data-role="engineer" data-sec="kanban" hidden><div class="wrap">
+  <div class="card"><div class="head"><h2>Improvement kanban</h2><p class="note" style="margin:0">Drag a card or use the arrows. Cards from the selected sector are outlined.</p></div><div class="seg" id="e-kbsel" role="group" aria-label="Kanban column" style="margin-bottom:10px" hidden></div><div class="kb" id="e-kb"></div></div>
+</div></section>
+<section class="band sec" data-role="engineer" data-sec="waste" hidden><div class="wrap">
+  <div class="card"><h2>Waste map: areas × TIMWOODS, last 8 weeks</h2><div class="scroll"><table class="heat" id="e-heat"></table></div></div>
+</div></section>
+<section class="band sec" data-role="engineer" data-sec="repeat" hidden><div class="wrap">
+  <div class="two">
+    <div class="card"><h2>Recurring issues</h2><p class="note">Same area and waste type, or same trigger, three or more times across shifts.</p><div id="e-pats"></div></div>
+    <div class="card" id="rca-card"><h2>Root-cause assistant</h2><div id="e-rca"></div></div>
+  </div>
+</div></section>
+<section class="band sec" data-role="engineer" data-sec="loop" hidden><div class="wrap">
+  <div class="card"><h2>Close the loop: fixes waiting to become standard</h2><p class="note">Actions that worked, but the work instruction or checklist still has the old way.</p><div id="e-loop"></div></div>
+</div></section>
+
+<section class="band sec" data-role="manager" data-sec="score" hidden><div class="wrap">
+  <div class="grid" style="margin-top:0">
+    <div class="card"><h2>Plant Gemba IQ, weekly trend</h2><div class="fig" id="m-fig"><svg id="m-svg" role="img" aria-label="Weekly Gemba IQ trend"></svg></div></div>
+    <div class="card"><div class="big" id="m-big"></div><div id="m-meters"></div></div>
+  </div>
+</div></section>
+<section class="band sec" data-role="manager" data-sec="breakdown" hidden><div class="wrap">
+  <div class="card">
+    <div class="seg" role="tablist" aria-label="Breakdown" id="m-tabs" style="margin-bottom:14px">
+      <button type="button" role="tab" id="t-area" aria-controls="p-area" aria-selected="true">By area <span class="cnt">7</span></button>
+      <button type="button" role="tab" id="t-shift" aria-controls="p-shift" aria-selected="false" tabindex="-1">By shift <span class="cnt">3</span></button>
+    </div>
+    <div role="tabpanel" id="p-area" aria-labelledby="t-area" tabindex="0"><p class="note" style="margin:0 0 6px">Sorted from lowest score. Tap a row to open the sector on the map.</p><div class="scroll"><table class="stack" id="m-areas"></table></div></div>
+    <div role="tabpanel" id="p-shift" aria-labelledby="t-shift" tabindex="0" hidden><p class="note" style="margin:0 0 6px">Observations and actions raised on each shift, last 8 weeks.</p><div class="scroll"><table class="stack" id="m-shifts"></table></div></div>
+  </div>
+</div></section>
+<section class="band sec" data-role="manager" data-sec="next" hidden><div class="wrap">
+  <div class="card" style="max-width:720px"><h2>Next best moves</h2><ol id="m-next" style="padding-left:20px;margin:0"></ol></div>
+</div></section>
+
+<section class="band sec" data-role="all" data-sec="info" hidden><div class="wrap info">
+  <div class="card">
+    <h1 style="font-size:clamp(26px,3.6vw,38px)">About Gemba IQ</h1>
+    <p class="sub" style="font-size:17px">Gemba IQ turns Gemba walks into decisions. One shared plant map shows where to look today, what is really happening in each sector, and whether the improvements made on the floor actually stick.</p>
+    <div class="chips" style="margin-top:12px" id="info-toc">
+      <button type="button" class="ghost" data-go="i-start">Getting started</button><button type="button" class="ghost" data-go="i-map">Plant map and layers</button><button type="button" class="ghost" data-go="i-all">Capture &amp; Action plan</button><button type="button" class="ghost" data-go="i-sup">Supervisor</button><button type="button" class="ghost" data-go="i-eng">CI Engineer</button><button type="button" class="ghost" data-go="i-man">Plant Manager</button><button type="button" class="ghost" data-go="i-calc">How scores are calculated</button><button type="button" class="ghost" data-go="i-gloss">Glossary</button><button type="button" class="ghost" data-go="i-data">Data and privacy</button>
+    </div>
+  </div>
+
+  <div class="card mt" id="i-why"><h2>Why it exists</h2>
+    <p>Gemba walks often end as notes on paper: problems are seen, but actions get lost, the same issue comes back on the next shift, and managers learn about it from a report days later. Gemba IQ connects four things in one place:</p>
+    <ol><li><strong>Where to go:</strong> a daily walk plan based on risk.</li><li><strong>What is wrong:</strong> 4M status, flow against takt and live reports per sector.</li><li><strong>What we do about it:</strong> observations turned into actions with owners and due dates.</li><li><strong>Did it stick:</strong> repeat issues, improvement projects and the loop back to the standard.</li></ol>
+    <p>The principle behind it: <em>fix the process first, then automate.</em></p>
+  </div>
+
+  <div class="card mt" id="i-start"><h2>Getting started</h2>
+    <ol><li>Tap <strong>☰</strong> in the top-left corner to open the menu.</li><li>Under <strong>Viewing as</strong>, choose your role: Supervisor, CI Engineer or Plant Manager. You can also tap the yellow role button in the top-right corner.</li><li>Every role starts on the <strong>Plant map</strong>. Tap a sector to open its panel.</li><li>Pick any other section from the menu. Only one section is shown at a time, so it works well on a phone.</li><li>Tap <strong>ⓘ</strong> or <strong>About &amp; help</strong> in the menu to come back to this page.</li></ol>
+  </div>
+
+  <div class="card mt" id="i-map"><h2>Plant map and layers</h2>
+    <p>The map is the same for every role. Each rectangle is a sector of the plant. Colours follow andon logic: <span class="hi">red = act now</span>, <span class="mid">amber = watch</span>, <span class="lo">green = OK</span>. The sector with a thick dark border is the one selected.</p>
+    <table class="stack"><thead><tr><th>Layer</th><th>What the number means</th></tr></thead><tbody>
+    <tr><td><strong>Walk risk</strong></td><td>A score from 0 to 100 that says where a Gemba walk is most useful today. The yellow route numbers 1-2-3 are today's walk order.</td></tr>
+    <tr><td><strong>Flow vs takt</strong></td><td>Cycle time as a % of takt time. Above 100% the sector cannot keep up with customer demand: it is the bottleneck.</td></tr>
+    <tr><td><strong>4M</strong></td><td>How many of the four Ms (Man, Machine, Material, Method) are at risk. Each small square is one M.</td></tr>
+    <tr><td><strong>OEE</strong></td><td>Overall equipment effectiveness for the current shift.</td></tr>
+    <tr><td><strong>Improvements</strong></td><td>Number of improvement projects planned, in progress or in verification in the sector.</td></tr></tbody></table>
+    <p style="margin-top:12px"><strong>Sector panel:</strong> next to (or under) the map. Its tabs change with your role: Supervisor sees 4M, Events and Actions; CI Engineer sees Improvements, 4M and Events; Plant Manager sees Production, Quality, Engineering, ERP and Events.</p>
+  </div>
+
+  <details class="card mt" id="i-all" open><summary><h2>For every role</h2></summary>
+    <dl class="defs">
+      <dt>Capture observation</dt><dd>Anyone on a Gemba walk can record a problem: choose the area and shift, write what you saw, then <strong>Take photo</strong> (opens the phone camera) or pick one <strong>From gallery</strong>. Tap <strong>Analyse</strong>: Gemba IQ suggests the waste type, five whys and an action. Add an owner and tap <strong>Create action</strong>; the photos go with the problem into the Action plan.</dd>
+      <dt>Home</dt><dd>The app opens here, in the role you used last. You see today's main finding, four big buttons (Start Gemba walk, Capture, Action plan, Plant map), four numbers for your role and the list of all your sections. Switch role with the three buttons at the top.</dd>
+      <dt>Bottom bar (phone)</dt><dd>On a phone the main places are always at the bottom, under your thumb: <strong>Home</strong>, <strong>Map</strong>, the blue <strong>＋ Walk</strong> in the middle to start a Gemba walk, <strong>Capture</strong> to note an observation from anywhere and <strong>Actions</strong> (the red number = late actions). All other sections are on Home. During a walk the bar changes to <strong>Back / Next</strong>, and on a phone the checklist shows one check at a time with big Yes / No / N/A buttons.</dd>
+      <dt>Gemba walk</dt><dd>A guided walk in 4 steps. Choose the area and the <strong>focus</strong> (Flow, Quality, Standard work, Waste, Safety, 5S, People); Gemba IQ suggests the focus from the sector data. <strong>1 Checklist</strong>: answer each check Yes / No / N/A; every <strong>No</strong> becomes an action with an owner. <strong>2 Observe</strong>: note a Concern, Waste, Good practice or Idea, with photos. <strong>3 Time study</strong> (optional): time 5–10 cycles; the average can update the sector's cycle time on the map. <strong>4 Reflect</strong>: Think (what surprised you) and Do (what you will follow up). Finishing saves a report you can print, save as PDF or copy into an e-mail. All reports are in <strong>Walk history</strong> (Home → Walk history, or the menu). Each walk counts for walk coverage and lowers the sector's walk risk.</dd>
+      <dt>Process, not person</dt><dd>If a text reads like blame ("operator forgot…"), a yellow note asks you to describe the process instead. Gemba looks for what in the system lets the problem happen.</dd>
+      <dt>Good practice and ideas</dt><dd>In Capture observation, choose the type. Concerns and waste go through Analyse to the Action plan. Good practice and ideas are saved and listed under the form, so they can be copied to other sectors.</dd>
+      <dt>Action plan</dt><dd>Every problem with its <strong>priority</strong> (High / Medium / Low), the <strong>responsible person</strong> (name, surname and role), the <strong>due date</strong> and photos. Open actions are sorted High first, then by due date. Gemba IQ proposes the priority: High for safety, the bottleneck sector or defects with customer complaints; Medium for other defects, waiting or problems after a change; Low for the rest. You can change it. <strong>Open</strong> shows what is still to do (late ones first); <strong>Closed</strong> shows what was done and whether the fix held. The camera button on a row adds an <strong>After</strong> photo, so before and after can be compared. Tap any photo to enlarge it.</dd>
+      <dt>Action dashboard</dt><dd>At the top of the Action plan: two numbers next to the title (% of actions closed on time and how many are late) and three charts. <strong>Overview</strong>: a ring chart of open actions by priority (High / Medium / Low), with how many are late. <strong>By area</strong>: a spider chart of open (blue) and late (red) actions per sector. <strong>Pareto</strong>: actions of the last 8 weeks by waste type, largest first; the blue bars are the vital few that make up about 80%. Tap a slice, a sector or a bar to filter the action list; <strong>Show all</strong> removes the filter. Each chart has a data table.</dd>
+      <dt>5 golden rules</dt><dd>Masaaki Imai's rules for any problem: 1 go to gemba, 2 check the gembutsu (the real thing), 3 contain it now, 4 find the root cause, 5 standardize. Each action shows 5 squares; open them to tick the real-thing check and write the containment and the root cause. An action cannot be closed without a root cause. A closed action waits for <strong>approval</strong> by the Supervisor or Plant Manager, who can approve it or reopen it.</dd>
+    </dl></details>
+
+  <details class="card mt" id="i-sup" open><summary><h2>Supervisor</h2></summary>
+    <dl class="defs">
+      <dt>Plant map</dt><dd>Today's walk route over the risk map. Tap a sector to see its 4M, the last 24 h of events and its open actions.</dd>
+      <dt>4M board</dt><dd>All sectors in one table: Man, Machine, Material, Method, cycle time against takt and WIP against its maximum. The bottleneck is listed first and marked. Tap a row to open that sector on the map.</dd>
+      <dt>Walk plan</dt><dd>Sectors ranked by walk risk, with the top three reasons for each. Start with number 1. <strong>Start walk here</strong> opens a guided walk for that sector.</dd>
+      <dt>Walk schedule</dt><dd>The weekly Kamishibai board: which leader walks which sector each day. Green = done, red = missed, yellow = due today. Tap a card to start the walk or to read its report.</dd>
+      <dt>Capture and Action plan</dt><dd>See <em>For every role</em>. When the supervisor taps <strong>Done</strong> on an action, it goes to the CI Engineer to be made standard.</dd>
+    </dl></details>
+
+  <details class="card mt" id="i-eng" open><summary><h2>CI Engineer</h2></summary>
+    <dl class="defs">
+      <dt>Plant map</dt><dd>Opens on the Improvements layer. The sector panel lists each project in the sector with its KPI: baseline → current → target.</dd>
+      <dt>Improvement dashboard</dt><dd>Active projects, projects past their due date, projects standardized and the average progress to target.</dd>
+      <dt>Timeline</dt><dd>Each project as a bar across the weeks, coloured by stage. The yellow line is this week. Switch between all sectors and the selected sector.</dd>
+      <dt>Kanban</dt><dd>Projects move through five stages: <strong>Idea</strong> (proposed), <strong>Planned</strong> (owner and dates set), <strong>In progress</strong> (being done), <strong>Verify</strong> (checking the KPI really improved), <strong>Standardized</strong> (written into the standard). Drag a card or use the arrows. On a phone, choose the column at the top.</dd>
+      <dt>Waste map</dt><dd>How many observations of each waste type (TIMWOODS) each sector had in the last 8 weeks. Darker = more.</dd>
+      <dt>Repeat issues &amp; root cause</dt><dd>An issue counts as repeating when the same sector has the same waste type or the same trigger <strong>3 or more times on at least 2 shifts</strong> in 8 weeks. Pick a pattern to see the evidence, what was tried before and whether it held, five whys and a hypothesis.</dd>
+      <dt>Close the loop</dt><dd>Fixes that worked but are not yet in the work instruction or checklist. <strong>Draft update</strong> proposes the new step; <strong>Mark updated</strong> closes it.</dd>
+    </dl></details>
+
+  <details class="card mt" id="i-man" open><summary><h2>Plant Manager</h2></summary>
+    <dl class="defs">
+      <dt>Plant map</dt><dd>Opens on the OEE layer. In the sector panel: <strong>Production</strong> (output per hour against plan, attainment, OEE), <strong>Quality</strong> (FPY, scrap, top defects, complaints), <strong>Engineering</strong> (ECNs, deviations, documents to update), <strong>ERP</strong> (work orders, shortages, WIP) and <strong>Events</strong> (what happened in the last 24 h, from all systems, in time order).</dd>
+      <dt>Gemba IQ score</dt><dd>One number for how well the Gemba routine works, its weekly trend and its four parts.</dd>
+      <dt>By area · by shift</dt><dd>The score and its parts per sector (lowest first) and per shift. Tap a sector row to open it on the map.</dd>
+      <dt>Next best moves</dt><dd>The sector with the lowest OEE, the two sectors with the lowest score, each with the habit to work on, and how many planned leader walks were done this week.</dd>
+      <dt>Walk schedule and approvals</dt><dd>The same Kamishibai board as the Supervisor. In the Action plan, closed actions wait for your approval.</dd>
+    </dl></details>
+
+  <div class="card mt" id="i-calc"><h2>How scores are calculated</h2>
+    <h3>Walk risk (0–100)</h3>
+    <p>Points are added for: scrap above its 4-week average (up to 30), downtime in the last 24 h (up to 20), cycle time close to or above takt (6 or 12), changeovers today (4 each, up to 12), new operators (5 each, up to 10), an engineering change in the last 7 days (up to 15), overdue actions (4 each, up to 12) and days since the last walk when 5 or more (up to 10).</p>
+    <h3>4M status</h3>
+    <p><strong>Man:</strong> red if fewer people than planned; amber if skills coverage is under 85% or there are new operators. <strong>Machine:</strong> red if down or availability under 80%; amber under 90% or in setup. <strong>Material:</strong> red if WIP is over its maximum; amber with a shortage or kits on time under 85%. <strong>Method:</strong> red if the standard work audit is under 75%; amber under 85%, with an open deviation or overdue actions.</p>
+    <h3>OEE</h3>
+    <p>OEE = Availability × Performance × Quality. Quality is the first pass yield.</p>
+    <h3>Gemba IQ score (0–100)</h3>
+    <p>25% walk coverage (target 4 walks per sector in 4 weeks) + 25% observations turned into actions + 30% actions closed on time + 20% issues that did not repeat. Every finished Gemba walk adds to walk coverage.</p>
+    <h3>Walk checklist score</h3>
+    <p>Yes answers divided by Yes + No answers. N/A does not count.</p>
+    <h3>Time study</h3>
+    <p>Average of the timed cycles, compared with takt. Variation = (slowest − fastest) / average; above 15% the pace is uneven (Mura).</p>
+  </div>
+
+  <div class="card mt" id="i-gloss"><h2>Glossary</h2>
+    <label for="gq">Search a term</label><input id="gq" type="search" placeholder="e.g. OEE, takt, SMED">
+    <dl class="defs" id="gloss"></dl>
+  </div>
+
+  <div class="card mt" id="i-data"><h2>Data and privacy</h2>
+    <p>All plants, people, orders and numbers in this demo are <strong>fictional</strong>: Northfield Components does not exist. In a real plant, the sector reports would come live from MES, QMS, PLM and ERP.</p>
+    <p>In the online version your changes are kept in your own browser. In the local app they are saved in the file <code>gembaiq.db</code> on your computer and shared with the phones on the same Wi-Fi. <strong>Reset demo data</strong> in the menu brings everything back to the start.</p>
+    <p class="note">Concept and design: Marcela Rotaru.</p>
+  </div>
+</div></section>
+</main>
+<nav id="bnav" aria-label="Main"></nav>
+<footer><div class="wrap">Demo with fictional plant data: Northfield Components does not exist. In a real plant the zone reports would come live from MES, QMS, PLM and ERP. Concept and design: Marcela Rotaru. Gemba IQ score = walk coverage 25% + observations turned into actions 25% + on-time closure 30% + no repeat issues 20%.</div></footer>
+<script>// Gemba IQ demo data. Northfield Components / Plant 2 is fictional.
+window.GIQ = {
+takt: 48,
+areas: [
+ {id:'wh',name:'Warehouse & Kitting',short:'Kitting',x:20,y:20,w:180,h:380,scrap:[.2,.2],dt:10,co:0,newOps:1,ecn:null,walk:6,walks4:2,
+  ct:38,wip:[0,0],state:'Running',stop:'Forklift battery change',
+  man:{staff:6,plan:6,absent:0,skills:92},mach:{avail:97},mat:{short:0,kitOnTime:88},meth:{audit:78,dev:0},
+  plan:[60,60,60,60,60,60,60,60],act:[61,58,60,55,57],fpy:99.6,defects:[['Wrong kit qty',4],['Damaged packaging',2]],complaints:0,
+  ecns:[],wo:[['WO-51870','Kits Line 3',480,300,'On track'],['WO-51871','Kits SMT 2',320,205,'On track']],shortItems:[]},
+ {id:'smt1',name:'SMT Line 1',short:'SMT 1',x:220,y:20,w:260,h:92,scrap:[1.4,1.5],dt:35,co:2,newOps:0,ecn:null,walk:1,walks4:5,
+  ct:41,wip:[120,200],state:'Running',stop:'Feeder error',
+  man:{staff:5,plan:5,absent:0,skills:95},mach:{avail:93},mat:{short:0,kitOnTime:96},meth:{audit:92,dev:0},
+  plan:[75,75,75,75,75,75,75,75],act:[74,76,70,75,73],fpy:98.6,defects:[['Tombstoning',5],['Solder bridge',3],['Missing part',1]],complaints:0,
+  ecns:[],wo:[['WO-51880','Sensor PCB rev B',600,370,'On track']],shortItems:[]},
+ {id:'smt2',name:'SMT Line 2',short:'SMT 2',x:220,y:124,w:260,h:92,scrap:[2.1,1.6],dt:70,co:3,newOps:0,ecn:9,walk:3,walks4:4,
+  ct:47,wip:[260,200],state:'Setup',stop:'Changeover > standard',
+  man:{staff:5,plan:5,absent:0,skills:88},mach:{avail:86},mat:{short:1,kitOnTime:84},meth:{audit:74,dev:1},
+  plan:[75,75,75,75,75,75,75,75],act:[70,44,72,61,66],fpy:97.9,defects:[['Print offset',9],['Wrong reel',3],['Solder bridge',2]],complaints:0,
+  ecns:[['ECN-2275','Stencil thickness 120 µm','Effective',-9]],wo:[['WO-51882','Sensor PCB rev C',600,313,'Behind 60']],shortItems:['Feeder cart #4 missing']},
+ {id:'mold',name:'Molding',short:'Molding',x:500,y:20,w:280,h:196,scrap:[3.2,2.9],dt:120,co:1,newOps:0,ecn:null,walk:2,walks4:4,
+  ct:44,wip:[300,500],state:'Down',stop:'Mold temperature alarm, press 3',
+  man:{staff:4,plan:4,absent:0,skills:90},mach:{avail:75},mat:{short:0,kitOnTime:100},meth:{audit:81,dev:1},
+  plan:[90,90,90,90,90,90,90,90],act:[88,90,52,60,30],fpy:96.8,defects:[['Short shot cav. 3',14],['Flash',6],['Sink marks',4]],complaints:1,
+  ecns:[],wo:[['WO-51890','Housing H-40',900,350,'Behind 100']],shortItems:[]},
+ {id:'asm3',name:'Assembly Line 3',short:'Assembly 3',x:220,y:236,w:300,h:164,scrap:[2.6,1.9],dt:55,co:2,newOps:2,ecn:2,walk:4,walks4:6,
+  ct:47,wip:[180,150],state:'Running',stop:'Waiting for EOL slot',
+  man:{staff:11,plan:12,absent:1,skills:76},mach:{avail:91},mat:{short:1,kitOnTime:79},meth:{audit:68,dev:1},
+  plan:[70,70,70,70,70,70,70,70],act:[68,52,66,63,58],fpy:97.4,defects:[['Wrong connector variant',6],['Torque NOK',3],['Label mismatch',2]],complaints:1,
+  ecns:[['ECN-2291','Sensor rev C: new connector','Effective',-2],['ECN-2294','Label template v4','In review',3]],wo:[['WO-51877','Module SM-200 rev C',560,307,'Behind 120']],shortItems:['Clip C-12 below min']},
+ {id:'eol',name:'End-of-line Test',short:'EOL Test',x:540,y:236,w:120,h:164,scrap:[.9,.8],dt:40,co:0,newOps:1,ecn:2,walk:1,walks4:4,
+  ct:50,wip:[95,60],state:'Running',stop:'Fixture change',
+  man:{staff:3,plan:3,absent:0,skills:80},mach:{avail:92},mat:{short:0,kitOnTime:100},meth:{audit:85,dev:1},
+  plan:[70,70,70,70,70,70,70,70],act:[66,64,67,62,63],fpy:99.1,defects:[['Test limit fail (rev C)',4],['Connector pin',2]],complaints:0,
+  ecns:[['ECN-2291','Test limits for rev C','Pending in test',-2]],wo:[['WO-51877','Module SM-200 rev C',560,322,'Behind 105']],shortItems:[]},
+ {id:'pack',name:'Packaging & Shipping',short:'Packing',x:680,y:236,w:100,h:164,scrap:[.3,.3],dt:15,co:0,newOps:0,ecn:null,walk:8,walks4:1,
+  ct:30,wip:[40,120],state:'Running',stop:'Label printer',
+  man:{staff:4,plan:4,absent:0,skills:94},mach:{avail:98},mat:{short:0,kitOnTime:100},meth:{audit:88,dev:0},
+  plan:[70,70,70,70,70,70,70,70],act:[64,62,65,60,61],fpy:99.9,defects:[['Box label',1]],complaints:0,
+  ecns:[],wo:[['SO-9012','Customer A, 1 200 pcs','Ships Thu']],shortItems:[]}],
+// [id,weeksAgo,area,shift,cat,trigger,text,owner,dueDays,status,effective,std]
+obs: [
+[1,0,'asm3','A','defects','changeover','Wrong connector variant staged at station 4 after changeover; caught at visual check.','L. Popa',2,'open','pending','n/a'],
+[2,0,'asm3','B','skills','newop','New operator unsure of torque sequence; work instruction photo is outdated after the ECN.','Training lead',3,'open','pending','n/a'],
+[3,1,'asm3','C','defects','changeover','First-piece check skipped after changeover on night shift.','Shift lead C',-2,'open','pending','n/a'],
+[4,2,'asm3','A','defects','changeover','Mixed labels in kanban bin after variant change.','L. Popa',-9,'late','yes','pending'],
+[5,3,'asm3','B','motion','none','Operator walks 12 m to fetch clips; supermarket too far from station 2.','Logistics',-15,'ontime','yes','updated'],
+[6,1,'asm3','A','waiting','none','Line stopped 18 min waiting for a free EOL test slot.','Test engineer',-4,'open','pending','n/a'],
+[7,0,'smt2','A','waiting','changeover','Feeder setup started only after the line stopped; no external setup.','SMT engineer',5,'open','pending','n/a'],
+[8,1,'smt2','B','defects','changeover','Solder paste print offset after stencil change; 2 panels reworked.','SMT engineer',-1,'open','pending','n/a'],
+[9,2,'smt2','C','waiting','changeover','Changeover took 52 min vs 30 min standard; feeder cart missing.','Shift lead C',-10,'ontime','no','n/a'],
+[10,4,'smt2','A','inventory','none','WIP stack of 14 magazines waiting before AOI.','Shift lead A',-24,'ontime','yes','updated'],
+[11,0,'mold','B','waiting','none','Mold temperature alarm; 40 min wait for maintenance.','Maintenance',1,'open','pending','n/a'],
+[12,1,'mold','A','defects','none','Short shots on cavity 3 after restart.','Process engineer',-3,'open','pending','n/a'],
+[13,2,'mold','C','defects','none','Flash on housing edge; trimming done by hand.','Process engineer',-8,'late','no','n/a'],
+[14,3,'mold','A','overprocessing','none','Parts deburred twice: at Molding and again at Assembly.','CI engineer',-16,'ontime','yes','pending'],
+[15,5,'mold','B','transport','none','Forklift route crosses the walkway next to Molding.','EHS',-30,'ontime','yes','updated'],
+[16,0,'eol','A','defects','ecn','Test limits not yet updated for the new sensor revision.','Test engineer',1,'open','pending','n/a'],
+[17,2,'eol','B','waiting','none','Fixture change blocks the tester 10 min every shift.','Test engineer',-6,'ontime','yes','pending'],
+[18,1,'wh','A','inventory','none','Kitting carts over-filled: two shifts of stock parked at Line 3.','Logistics',-5,'open','pending','n/a'],
+[19,3,'wh','B','transport','none','Double handling: parts moved to a buffer, then to the line.','Logistics',-14,'late','yes','pending'],
+[20,2,'smt1','A','motion','changeover','Operator searches for the stencil; no shadow board.','Shift lead A',-9,'ontime','yes','updated'],
+[21,4,'smt1','B','defects','none','Tombstoning on R12 traced to pad design; sent to engineering.','Design engineer',-20,'ontime','pending','n/a'],
+[22,6,'pack','A','overproduction','none','Boxes pre-packed for orders not yet released.','Shipping lead',-35,'ontime','yes','updated'],
+[23,7,'pack','B','motion','none','Tape dispenser on the wrong side of the bench.','',0,'none','pending','n/a'],
+[24,4,'asm3','C','defects','changeover','Wrong torque program selected after variant change.','Shift lead C',-21,'ontime','no','n/a'],
+[25,5,'asm3','A','skills','newop','No buddy assigned to a new hire on B shift.','Training lead',-29,'ontime','yes','updated'],
+[26,6,'smt2','B','defects','changeover','Wrong reel loaded after changeover; caught at first article.','SMT engineer',-36,'ontime','yes','pending'],
+[27,1,'eol','C','skills','newop','Night-shift operator not certified on the new tester software.','Training lead',4,'open','pending','n/a'],
+[28,3,'asm3','A','defects','changeover','Label printer template not switched after variant change.','L. Popa',-16,'ontime','yes','pending'],
+[29,5,'mold','B','defects','none','Sink marks on the housing after a material lot change.','Process engineer',-28,'ontime','no','n/a']],
+// improvement projects: id,title,area,method,owner,startWk,endWk (relative to this week),status,kpi,baseline,target,current,lowerIsBetter
+projects: [
+ ['P1','SMED: external feeder setup','smt2','SMED','SMT engineer',-5,2,'progress','Changeover, min',52,30,38,1],
+ ['P2','Poka-yoke: first-piece check after changeover','asm3','Poka-yoke','CI engineer',-3,1,'verify','Changeover defects / week',3,0,1,1],
+ ['P3','Quick-change test fixture','eol','SMED','Test engineer',-2,4,'progress','Tester setup, min / shift',10,3,7,1],
+ ['P4','Max levels on kitting carts','wh','Kanban','Logistics',-1,3,'planned','Stock at line, hours',16,4,16,1],
+ ['P5','Cavity 3 short shots','mold','DMAIC','Process engineer',-4,3,'progress','Scrap, %',3.2,2.0,2.9,1],
+ ['P6','Clips at point of use','asm3','5S','Logistics',-8,-3,'standard','Walking, m / cycle',12,2,2,1],
+ ['P7','Stencil shadow board','smt1','5S','Shift lead A',-7,-4,'standard','Search time, min / changeover',6,1,1,1],
+ ['P8','Deburr once: one quality standard','mold','Standard work','CI engineer',-3,0,'verify','Deburr operations',2,1,1,1],
+ ['P9','Pack only released orders','pack','Pull','Shipping lead',-10,-6,'standard','Pre-packed boxes',40,0,0,1],
+ ['P10','EOL capacity study vs takt','eol','VSM','CI engineer',1,5,'idea','Cycle time vs takt, %',104,95,104,1]],
+// last 24 h events by area: [time, source, text]
+events: {
+ asm3:[['05:58','MES','Shift A started: 11 of 12 operators'],['06:12','MES','Line stopped 18 min: waiting for EOL test slot'],['06:40','QMS','Scrap alert: 6 units wrong connector variant (station 4)'],['07:15','Gemba','Observation: wrong variant staged after changeover'],['08:05','PLM','ECN-2291 effective: sensor rev C, new connector'],['09:30','ERP','WO-51877 behind plan by 120 units'],['10:10','QMS','Customer complaint #C-318 opened (label mismatch)']],
+ smt2:[['06:00','MES','Changeover to rev C started'],['06:52','MES','Changeover finished: 52 min (standard 30)'],['07:20','QMS','2 panels reworked: print offset'],['08:45','ERP','Feeder cart #4 not found in stock'],['09:10','MES','WIP before AOI 260 units (max 200)']],
+ mold:[['06:05','MES','Press 3 running, cavity 3 under watch'],['08:12','MES','Press 3 down: mold temperature alarm'],['08:50','CMMS','Maintenance on site (38 min response)'],['09:40','QMS','Short shots cavity 3: 14 parts'],['10:15','ERP','WO-51890 behind plan by 100 units']],
+ eol:[['06:00','MES','Tester 1 and 2 running'],['07:30','MES','Fixture change, tester 2: 11 min'],['08:05','PLM','ECN-2291: rev C test limits pending'],['09:00','QMS','4 rev C units failed test limit (under review)']],
+ wh:[['05:30','ERP','Kits released for Line 3 and SMT 2'],['07:10','MES','Kitting cart at Line 3 over max level'],['09:00','ERP','Clip C-12 below minimum stock']],
+ smt1:[['06:00','MES','Running rev B'],['07:45','MES','Feeder error, 6 min'],['09:20','QMS','Tombstoning R12: 2 units (known, design action open)']],
+ pack:[['06:00','MES','Packing SO-9012'],['08:30','MES','Label printer restart, 4 min']]}
+};
+</script>
+<script>{
+const D=window.GIQ;
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const ls={get(k,d){try{const v=localStorage.getItem(k);return v===null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){return false}}};
+const TODAY=new Date();
+const CATS={transport:'Transport',inventory:'Inventory',motion:'Motion',waiting:'Waiting',overproduction:'Overproduction',overprocessing:'Overprocessing',defects:'Defects',skills:'Unused skills'};
+const TRIG={changeover:'After changeover',newop:'New operator',ecn:'Engineering change',none:''};
+const AREAS=D.areas,A=Object.fromEntries(AREAS.map(a=>[a.id,a])),TAKT=D.takt;
+let OBS=D.obs.map(r=>({id:r[0],wk:r[1],area:r[2],shift:r[3],cat:r[4],trig:r[5],text:r[6],owner:r[7],due:r[8],status:r[9],eff:r[10],std:r[11]}));
+const saved=ls.get('giq_obs',[]);if(Array.isArray(saved))for(const o of saved.filter(o=>o&&A[o.area]&&CATS[o.cat])){const i=OBS.findIndex(x=>x.id===o.id);if(i>=0)OBS[i]=o;else OBS.push(o)}
+const saveObs=()=>{if(!ls.set('giq_obs',OBS))toast('Storage is full: photos may not be kept.')};
+const STAGES=[['idea','Idea'],['planned','Planned'],['progress','In progress'],['verify','Verify'],['standard','Standardized']];
+const kbSaved=ls.get('giq_kb',{});
+const PROJ=D.projects.map(p=>({id:p[0],title:p[1],area:p[2],method:p[3],owner:p[4],s:p[5],e:p[6],status:STAGES.some(x=>x[0]===kbSaved[p[0]])?kbSaved[p[0]]:p[7],kpi:p[8],base:p[9],target:p[10],cur:p[11]}));
+const saveKb=()=>ls.set('giq_kb',Object.fromEntries(PROJ.map(p=>[p.id,p.status])));
+const overdue=o=>o.status==='open'&&o.due<0;
+const dueTxt=o=>o.status==='none'?'':o.status!=='open'?'Closed':o.due<0?`${-o.due} d overdue`:o.due===0?'Today':`In ${o.due} d`;
+const col={hi:'var(--red)',mid:'var(--amber)',lo:'var(--green)'};
+const pct=v=>Math.round(v*100)+'%';
+
+/* ---------- metrics ---------- */
+function risk(a){const r=[];let s=0;const ratio=a.scrap[0]/a.scrap[1];
+ if(ratio>1.05){const p=Math.min((ratio-1)*60,30);s+=p;r.push([p,`Scrap ${a.scrap[0]}% vs ${a.scrap[1]}% avg (+${Math.round((ratio-1)*100)}%)`])}
+ if(a.dt>20){const p=Math.min(a.dt/6,20);s+=p;r.push([p,`${a.dt} min downtime, last 24 h`])}
+ if(a.ct/TAKT>=.97){const p=a.ct>=TAKT?12:6;s+=p;r.push([p,`Cycle ${a.ct} s vs takt ${TAKT} s`])}
+ if(a.co){const p=Math.min(a.co*4,12);s+=p;r.push([p,`${a.co} changeover${a.co>1?'s':''} today`])}
+ if(a.newOps){const p=Math.min(a.newOps*5,10);s+=p;r.push([p,`${a.newOps} new operator${a.newOps>1?'s':''}`])}
+ if(a.ecn!==null&&a.ecn<=7){const p=15-a.ecn;s+=p;r.push([p,`Engineering change ${a.ecn} days ago`])}
+ const od=OBS.filter(o=>o.area===a.id&&overdue(o)).length;if(od){const p=Math.min(od*4,12);s+=p;r.push([p,`${od} overdue action${od>1?'s':''}`])}
+ if(a.walk>=5){const p=Math.min(a.walk,10);s+=p;r.push([p,`Not walked for ${a.walk} days`])}
+ return{score:Math.min(100,Math.round(s)),reasons:r.sort((x,y)=>y[0]-x[0]).map(x=>x[1])}}
+const lvl=s=>s>=50?'hi':s>=30?'mid':'lo';
+function fourM(a){const st=(b,w)=>b?'hi':w?'mid':'lo',od=OBS.filter(o=>o.area===a.id&&overdue(o)).length,wipOver=a.wip[1]&&a.wip[0]>a.wip[1];
+ return[
+  {k:'Man',b:a.man.staff<a.man.plan?`${a.man.staff} / ${a.man.plan} staffed, ${a.man.absent} absent`:a.newOps?`${a.newOps} new operator${a.newOps>1?'s':''} · skills ${a.man.skills}%`:`Full · skills ${a.man.skills}%`,s:st(a.man.staff<a.man.plan,a.man.skills<85||a.newOps>0),t:`${a.man.staff} / ${a.man.plan} staffed${a.man.absent?`, ${a.man.absent} absent`:''}${a.newOps?`, ${a.newOps} new`:''} · skills ${a.man.skills}%`},
+  {k:'Machine',b:a.state!=='Running'?`${a.state}: ${a.stop}`:`Running · avail. ${a.mach.avail}%`,s:st(a.state==='Down'||a.mach.avail<80,a.mach.avail<90||a.state==='Setup'),t:`${a.state} · availability ${a.mach.avail}% · ${a.dt} min down (24 h) · top stop: ${a.stop}`},
+  {k:'Material',b:wipOver?`WIP ${a.wip[0]} / ${a.wip[1]}: over max`:a.mat.short?(a.shortItems[0]||'1 shortage'):`OK · kits on time ${a.mat.kitOnTime}%`,s:st(wipOver,a.mat.short>0||a.mat.kitOnTime<85),t:`${a.mat.short?a.mat.short+' shortage'+(a.shortItems.length?': '+a.shortItems.join(', '):''):'No shortages'} · kits on time ${a.mat.kitOnTime}%${a.wip[1]?` · WIP ${a.wip[0]} / ${a.wip[1]}`:''}`},
+  {k:'Method',b:`Audit ${a.meth.audit}%${a.meth.dev?` · ${a.meth.dev} deviation`:''}${od?` · ${od} overdue`:''}`,s:st(a.meth.audit<75,a.meth.audit<85||a.meth.dev>0||od>0),t:`Standard work audit ${a.meth.audit}% · ${a.meth.dev} deviation${a.meth.dev===1?'':'s'} · ${a.co} changeover${a.co===1?'':'s'} · ${od} overdue action${od===1?'':'s'}`}]}
+const flow=a=>a.ct/TAKT;
+const flowLvl=a=>flow(a)>=1?'hi':flow(a)>=.95?'mid':'lo';
+function prod(a){const n=a.act.length,plan=a.plan.slice(0,n).reduce((x,y)=>x+y,0),act=a.act.reduce((x,y)=>x+y,0),att=act/plan,Av=a.mach.avail/100,P=Math.min(.95,att/Av)*Math.min(1,TAKT/a.ct),Q=a.fpy/100;return{plan,act,att,Av,P,Q,oee:Av*P*Q}}
+const oeeLvl=v=>v<.65?'hi':v<.8?'mid':'lo';
+const active=p=>p.status==='progress'||p.status==='verify'||p.status==='planned';
+const progress=p=>Math.max(0,Math.min(1,(p.base-p.cur)/(p.base-p.target||1)));
+const wkTxt=w=>w===0?'this week':w>0?`in ${w} wk`:`${-w} wk ago`;
+
+/* ---------- rules used when AI is off ---------- */
+const KEYS=[['defects',/wrong|defect|scrap|rework|short shot|flash|offset|missing|skipp|mixed|error|crack|leak|damag/i],['waiting',/wait|stopp|idle|block|queue|delay|alarm/i],['motion',/walk|search|reach|fetch|bend|look(ing)? for/i],['transport',/forklift|moved|carry|transport|handling|truck/i],['inventory',/wip|stock|stack|buffer|over-?fill|excess|pile/i],['overprocessing',/twice|double.?check|re-?inspect|deburr|extra step|again/i],['overproduction',/pre-?pack|ahead of|too many|before.*order|not (yet )?released/i],['skills',/new (operator|hire)|training|unsure|not certified|instruction|idea/i]];
+const classify=t=>(KEYS.find(k=>k[1].test(t))||['defects'])[0];
+const trigOf=t=>/changeover|variant|setup|stencil|reel/i.test(t)?'changeover':/new (operator|hire)/i.test(t)?'newop':/\becn\b|revision|engineering change/i.test(t)?'ecn':'none';
+const WHY={defects:['Why did the defect reach this station without being stopped?','Why did the check before it not catch it?','Why was the check skipped or unclear at that moment?','Why does the standard allow that gap (e.g. after changeover)?','Why was the gap not seen in earlier walks or audits?'],
+waiting:['Why was the operator or machine waiting?','Why was the input (part, person, tester) not ready?','Why was the need not signalled earlier?','Why is there no buffer or visual signal for it?','Why has the waiting not been measured before?'],
+motion:['Why does the operator need to move or search?','Why is the item not at the point of use?','Why was the layout designed this way?','Why has nobody flagged it (is it seen as normal)?','Why is point-of-use not part of the station standard?'],
+transport:['Why is the material moved here?','Why is it not delivered directly to its point of use?','Why is the route or buffer needed?','Why is the flow planned this way?','Why has the double move not been measured?'],
+inventory:['Why is there more stock than needed?','Why was more released or delivered?','Why is the pull signal not limiting it?','Why are kanban sizes set this way?','Why is excess not visible on the board?'],
+overprocessing:['Why is the step done twice?','Why does the next process not trust the first one?','Why is the requirement unclear?','Why was the extra step never removed?','Why is there no agreed quality standard between the two areas?'],
+overproduction:['Why was it made before it was needed?','Why was the order released early?','Why does the plan push instead of pull?','Why is early work rewarded or not visible?','Why is there no rule against it?'],
+skills:['Why was the person unsure?','Why did training not cover this case?','Why is the instruction outdated or unclear?','Why was the update not triggered by the change?','Why is there no check of skills before the shift?']};
+const ACT={defects:'Add a first-piece check to the changeover checklist; verify on the next 5 changeovers.',waiting:'Make the signal visible (andon or board) and agree a response time; measure waiting for 1 week.',motion:'Move the item to point of use (shadow board or rack) and update the station layout.',transport:'Remove the intermediate buffer; deliver directly to point of use for one week as a trial.',inventory:'Set a max level on the kanban or cart and mark it on the floor.',overprocessing:'Agree one quality standard between the two areas and remove the duplicate step.',overproduction:'Release work only on a confirmed order; add the rule to the shift start-up.',skills:'Update the work instruction with a current photo and run a 10-min buddy check.'};
+
+/* ---------- AI (optional) ---------- */
+let ai=null;
+(async()=>{try{ai=await window.claude?.use?.('sample')}catch(e){ai=null}document.body.classList.toggle('has-ai',!!ai)})();
+async function askAI(prompt,out,btn){if(!ai)return;btn.disabled=true;out.textContent='Thinking…';
+ try{const r=await ai(prompt,{onText:({text})=>{out.textContent=text}});out.textContent=r.text}
+ catch(e){out.textContent=e&&e.code==='rate_limited'?'The AI is busy. Try again in a minute.':'AI is not available in this view.'}
+ btn.disabled=false}
+const plain='Answer in plain text, no markdown, short numbered lines, under 140 words. You are a Lean / continuous improvement coach in an automotive components plant.';
+
+/* ---------- state ---------- */
+const ROLES=['supervisor','engineer','manager'];
+let ROLE='supervisor';
+const RANKED=()=>AREAS.map(a=>({a,...risk(a)})).sort((x,y)=>y.score-x.score);
+let ZONE=RANKED()[0].a.id;
+const DEF_LAYER={supervisor:'risk',engineer:'improve',manager:'oee'};
+let LAYER=null;
+const LAYERS=[['risk','Walk risk'],['flow','Flow vs takt'],['m4','4M'],['oee','OEE'],['improve','Improvements']];
+const PANEL={supervisor:[['m4','4M'],['events','Events'],['actions','Actions']],engineer:[['improve','Improvements'],['m4','4M'],['events','Events']],manager:[['prod','Production'],['qual','Quality'],['eng','Engineering'],['erp','ERP'],['events','Events']]};
+const panelTab=ls.get('giq_ptab',{});
+
+/* ---------- shared map ---------- */
+function layerInfo(a){
+ if(LAYER==='risk'){const r=risk(a);return{l:lvl(r.score),v:r.score,lab:'risk'}}
+ if(LAYER==='flow'){return{l:flowLvl(a),v:Math.round(flow(a)*100)+'%',lab:'of takt'}}
+ if(LAYER==='m4'){const m=fourM(a),w=m.some(x=>x.s==='hi')?'hi':m.some(x=>x.s==='mid')?'mid':'lo';return{l:w,v:m.filter(x=>x.s!=='lo').length+'/4',lab:'M at risk',m}}
+ if(LAYER==='oee'){const o=prod(a).oee;return{l:oeeLvl(o),v:pct(o),lab:'OEE'}}
+ const n=PROJ.filter(p=>p.area===a.id&&active(p)).length;return{l:n>=2?'hi':n?'mid':'lo',v:n,lab:'active',steel:true}}
+const MOB={wh:[10,10,380,74],smt1:[10,98,185,110],smt2:[205,98,185,110],mold:[10,222,380,110],asm3:[10,346,380,130],eol:[10,490,185,140],pack:[205,490,185,140]};
+let NARROW=false;
+function renderMap(){
+ NARROW=($('#map').clientWidth||innerWidth)<560;
+ const G=a=>NARROW?{x:MOB[a.id][0],y:MOB[a.id][1],w:MOB[a.id][2],h:MOB[a.id][3]}:{x:a.x,y:a.y,w:a.w,h:a.h},VW=NARROW?400:800,VH=NARROW?640:420;
+ $('#layers').innerHTML=LAYERS.map(([k,v])=>`<button type="button" data-l="${k}" aria-pressed="${k===LAYER}">${v}</button>`).join('');
+ $$('#layers button').forEach(b=>b.onclick=()=>{LAYER=b.dataset.l;renderMap()});
+ const top=RANKED().slice(0,3),c=a=>{const g=G(a);return{x:g.x+g.w/2,y:g.y+g.h/2}},pts=top.map(t=>c(t.a));
+ const bn=[...AREAS].sort((x,y)=>flow(y)-flow(x))[0];
+ const fill=(i)=>i.steel?`color-mix(in srgb,var(--steel) ${i.l==='hi'?35:i.l==='mid'?18:5}%,var(--panel))`:`color-mix(in srgb,${col[i.l]} ${i.l==='hi'?30:i.l==='mid'?20:10}%,var(--panel))`;
+ $('#map').innerHTML=`<svg viewBox="0 0 ${VW} ${VH}" role="img" aria-label="Plant floor plan, layer ${esc(LAYERS.find(l=>l[0]===LAYER)[1])}">
+ <defs><pattern id="tape" width="16" height="16" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="16" height="16" fill="#f2b705"/><rect width="8" height="16" fill="#16202a"/></pattern></defs>
+ <rect width="${VW}" height="${VH}" fill="url(#tape)"/><rect x="6" y="6" width="${VW-12}" height="${VH-12}" rx="4" style="fill:var(--bg)"/>
+ ${AREAS.map(a0=>{const a={...a0,...G(a0)},i=layerInfo(a0),sel=a.id===ZONE,small=!NARROW&&a.w<130,fs=NARROW?17:15,vs=NARROW?30:26;return `<g class="zone" tabindex="0" data-a="${a.id}" role="button" aria-label="${esc(a.name)}: ${i.v} ${i.lab}" aria-pressed="${sel}">
+  <rect x="${a.x}" y="${a.y}" width="${a.w}" height="${a.h}" rx="6" style="fill:${fill(i)};stroke:${sel?'var(--ink)':i.steel?'var(--steel)':col[i.l]};stroke-width:${sel?5:2}"/>
+  <text x="${a.x+10}" y="${a.y+24}" style="fill:var(--ink);font:600 ${small?13:fs}px Barlow,sans-serif">${esc(small||(NARROW&&a.w<200)?a.short:a.name)}</text>
+  ${i.m?`<g transform="translate(${a.x+10},${a.y+34})">${i.m.map((m,j)=>`<rect x="${j*22}" y="0" width="18" height="18" rx="3" style="fill:${col[m.s]}"/><text x="${j*22+9}" y="13" text-anchor="middle" style="font:700 11px Barlow,sans-serif;fill:#fff">${'MMMM'[j]}${j+1}</text>`).join('')}</g>`:''}
+  ${LAYER==='flow'&&a.id===bn.id?`<text x="${a.x+10}" y="${a.y+44}" style="font:700 12px Barlow,sans-serif;fill:var(--red)">BOTTLENECK</text>`:''}
+  <text x="${a.h<100?a.x+a.w-12:a.x+10}" y="${a.h<100?a.y+44:a.y+a.h-12}" text-anchor="${a.h<100?'end':'start'}" style="fill:${i.steel?'var(--steel)':col[i.l]};font:700 ${small?20:vs}px 'Barlow Semi Condensed',sans-serif">${esc(i.v)}</text></g>`}).join('')}
+ ${LAYER==='risk'?`<g style="pointer-events:none"><polyline class="route" points="${[NARROW?{x:200,y:636}:{x:110,y:410},...pts].map(p=>p.x+','+p.y).join(' ')}" fill="none" stroke="#f2b705" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+ ${pts.map((p,i)=>`<g><circle cx="${p.x}" cy="${p.y}" r="17" fill="#f2b705" stroke="#16202a" stroke-width="2"/><text x="${p.x}" y="${p.y+6}" text-anchor="middle" style="font:700 18px 'Barlow Semi Condensed',sans-serif;fill:#16202a">${i+1}</text></g>`).join('')}</g>`:''}
+ </svg>`;
+ const LEG={risk:'Walk risk score from scrap, downtime, takt, changeovers, new people, ECNs, overdue actions. Yellow route = today\'s walk.',flow:`Cycle time as % of takt (${TAKT} s). Over 100% = bottleneck.`,m4:'Man, Machine, Material, Method: each square is one M (M1 Man, M2 Machine, M3 Material, M4 Method).',oee:'OEE = availability × performance × quality, current shift.',improve:'Improvement projects planned, in progress or in verification.'};
+ $('#legend').innerHTML=(LAYER==='improve'?'':`<span><i style="background:var(--red)"></i>Act now</span><span><i style="background:var(--amber)"></i>Watch</span><span><i style="background:var(--green)"></i>OK</span>`)+`<span>${esc(LEG[LAYER])}</span>`;
+ $$('.zone').forEach(z=>{z.onclick=()=>selectZone(z.dataset.a);z.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();selectZone(z.dataset.a)}}});
+}
+let pendingScroll=false;
+function selectZone(id,openMap){ZONE=id;if(openMap&&SEC!=='map'){pendingScroll=true;location.hash=ROLE+'-map';return}
+ renderMap();renderZone();$('#c-area').value=id;$$('#s-rank li').forEach(li=>li.classList.toggle('sel',li.dataset.a===id));if(ROLE==='engineer'){renderGantt();renderKanban()}
+ if(NARROW||openMap)$('#zone').scrollIntoView({block:'start',behavior:'smooth'})}
+
+/* ---------- zone panel ---------- */
+function renderZone(){const a=A[ZONE],tabs=PANEL[ROLE];let t=panelTab[ROLE];if(!tabs.some(x=>x[0]===t))t=tabs[0][0];
+ const fl=flow(a),stCol=a.state==='Down'?'hi':a.state==='Setup'?'mid':'lo';
+ $('#zone').innerHTML=`<div class="zh"><h2>${esc(a.name)}</h2><span class="pill ${stCol}">${esc(a.state)}</span></div>
+ <p class="note" style="margin:4px 0 12px">Cycle ${a.ct} s vs takt ${TAKT} s (<strong class="${flowLvl(a)}">${Math.round(fl*100)}%</strong>)${fl>=1?' · bottleneck':''} · walk risk ${risk(a).score} · <button type="button" class="linkb" data-walk="${a.id}">Start walk here</button></p>
+ <div class="seg" role="tablist" aria-label="Sector details">${tabs.map(([k,v])=>`<button type="button" role="tab" data-t="${k}" aria-selected="${k===t}" tabindex="${k===t?0:-1}">${v}</button>`).join('')}</div>
+ <div id="zbody" role="tabpanel" style="margin-top:14px"></div>`;
+ const btns=$$('#zone [role=tab]');btns.forEach((b,i)=>{b.onclick=()=>{panelTab[ROLE]=b.dataset.t;ls.set('giq_ptab',panelTab);renderZone()};b.onkeydown=e=>{const k={ArrowRight:1,ArrowLeft:-1}[e.key];if(k){e.preventDefault();const n=btns[(i+k+btns.length)%btns.length];panelTab[ROLE]=n.dataset.t;renderZone();$(`#zone [data-t="${n.dataset.t}"]`).focus()}}});
+ const body=$('#zbody');
+ if(t==='m4'){const m=fourM(a);body.innerHTML=`<div class="m4">${m.map(x=>`<div style="--c:${col[x.s]}"><b>${x.k}</b>${esc(x.t)}</div>`).join('')}</div>
+  <p style="margin:12px 0 0"><strong>Read:</strong> ${esc(m4Read(a,m))}</p>`}
+ if(t==='events'){const ev=(D.events[a.id]||[]);body.innerHTML=`<ul class="tl">${ev.map(e=>`<li><span>${esc(e[0])}</span><span class="src">${esc(e[1])}</span><span>${esc(e[2])}</span></li>`).join('')}</ul>
+  <div class="btns"><button class="ghost ai" id="z-ai">Ask AI: what happened here?</button></div><div class="out" id="z-out"></div>`;
+  const b=$('#z-ai');b.onclick=()=>{const p=prod(a);askAI(`${plain}\nSector: ${a.name}, current shift. Output ${p.act} vs plan ${p.plan} (${pct(p.att)}), OEE ${pct(p.oee)}, FPY ${a.fpy}%, cycle ${a.ct} s vs takt ${TAKT} s, state ${a.state}.\nEvents last 24 h:\n${ev.map(e=>`${e[0]} [${e[1]}] ${e[2]}`).join('\n')}\nExplain in 4-6 lines what happened in this sector, the likely chain of cause and effect, and the one decision management should take today.`,$('#z-out'),b)}}
+ if(t==='actions'){const l=OBS.filter(o=>o.area===a.id&&o.status==='open').sort((x,y)=>x.due-y.due);body.innerHTML=l.length?`<ul class="tl">${l.map(o=>`<li style="grid-template-columns:90px minmax(0,1fr)"><span class="${overdue(o)?'hi':''}">${dueTxt(o)}</span><span>${esc(o.text)} <span class="note">· ${esc(o.owner)}</span>${thumbs(o,true)}</span></li>`).join('')}</ul>`:'<p class="empty">No open actions in this sector.</p>'}
+ if(t==='improve'){const l=PROJ.filter(p=>p.area===a.id);body.innerHTML=l.length?l.map(p=>`<div style="border-bottom:1px solid var(--line);padding:8px 0"><div class="zh"><strong>${esc(p.title)}</strong><span class="pill" style="color:var(--steel)">${STAGES.find(s=>s[0]===p.status)[1]}</span></div>
+  <div class="note">${esc(p.method)} · ${esc(p.owner)} · started ${wkTxt(p.s)}, due ${wkTxt(p.e)}</div>
+  <div style="font-size:14px;margin-top:4px">${esc(p.kpi)}: ${p.base} → <strong>${p.cur}</strong> (target ${p.target})</div><div class="prog"><i style="width:${Math.round(progress(p)*100)}%"></i></div></div>`).join(''):'<p class="empty">No improvement projects in this sector yet.</p>'}
+ if(t==='prod'){const p=prod(a),mx=Math.max(...a.plan,...a.act)*1.1,hrs=['06','07','08','09','10','11','12','13'];
+  body.innerHTML=`<div class="kv"><div><small>Output / plan</small><b>${p.act} / ${p.plan}</b></div><div><small>Attainment</small><b class="${p.att<.9?'hi':p.att<.97?'mid':'lo'}">${pct(p.att)}</b></div><div><small>OEE</small><b class="${oeeLvl(p.oee)}">${pct(p.oee)}</b></div><div><small>A · P · Q</small><b style="font-size:16px">${pct(p.Av)} · ${pct(p.P)} · ${pct(p.Q)}</b></div></div>
+  <div class="note">Units per hour, current shift (dashed line = plan)</div>
+  <div class="hbars">${a.plan.map((pl,i)=>`<div><em style="bottom:${pl/mx*100}%"></em>${a.act[i]!==undefined?`<span title="${a.act[i]} units" style="height:${a.act[i]/mx*100}%;${a.act[i]<pl*.9?'background:var(--red)':''}"></span>`:''}</div>`).join('')}</div>
+  <div class="hlab">${hrs.map(h=>`<span>${h}</span>`).join('')}</div><p class="note">Source: MES (fictional).</p>`}
+ if(t==='qual'){const mx=Math.max(1,...a.defects.map(d=>d[1])),qo=OBS.filter(o=>o.area===a.id&&o.cat==='defects'&&o.status==='open').length;
+  body.innerHTML=`<div class="kv"><div><small>First pass yield</small><b>${a.fpy}%</b></div><div><small>Scrap now / avg</small><b class="${a.scrap[0]>a.scrap[1]*1.05?'hi':'lo'}">${a.scrap[0]}% / ${a.scrap[1]}%</b></div><div><small>Customer complaints</small><b class="${a.complaints?'hi':'lo'}">${a.complaints}</b></div><div><small>Open quality actions</small><b>${qo}</b></div></div>
+  <div class="note">Top defects, last 24 h</div>${a.defects.map(d=>`<div class="par"><span>${esc(d[0])}</span><span><i style="width:${d[1]/mx*100}%"></i></span><span class="n">${d[1]}</span></div>`).join('')}<p class="note">Source: QMS (fictional).</p>`}
+ if(t==='eng'){const std=OBS.filter(o=>o.area===a.id&&o.eff==='yes'&&o.std==='pending');
+  body.innerHTML=`<table><thead><tr><th>Change</th><th>Status</th><th class="n">When</th></tr></thead><tbody>${a.ecns.map(e=>`<tr><td><strong>${esc(e[0])}</strong> ${esc(e[1])}</td><td>${esc(e[2])}</td><td class="n">${e[3]<0?(-e[3])+' d ago':'in '+e[3]+' d'}</td></tr>`).join('')||'<tr><td colspan="3" class="empty">No open engineering changes.</td></tr>'}</tbody></table>
+  <p style="margin:12px 0 4px"><strong>${a.meth.dev}</strong> process deviation${a.meth.dev===1?'':'s'} open · standard work audit <strong>${a.meth.audit}%</strong></p>
+  <div class="note">Documents waiting for an update (fixes that worked):</div><ul style="margin:4px 0 0;padding-left:20px;font-size:14px">${std.map(o=>`<li>${esc(o.text)}</li>`).join('')||'<li class="empty">None</li>'}</ul><p class="note">Source: PLM (fictional).</p>`}
+ if(t==='erp'){body.innerHTML=`<table class="stack"><thead><tr><th>Order</th><th>Item</th><th class="n">Done / qty</th><th>Status</th></tr></thead><tbody>${a.wo.map(w=>w.length===3?`<tr><td>${esc(w[0])}</td><td>${esc(w[1])}</td><td class="n">–</td><td>${esc(w[2])}</td></tr>`:`<tr><td>${esc(w[0])}</td><td>${esc(w[1])}</td><td class="n">${w[3]} / ${w[2]}</td><td class="${/Behind/.test(w[4])?'hi':''}">${esc(w[4])}</td></tr>`).join('')}</tbody></table>
+  <p style="margin:12px 0 0">Material: ${a.shortItems.length?`<span class="hi">${esc(a.shortItems.join(', '))}</span>`:'no shortages'} · kits on time ${a.mat.kitOnTime}%${a.wip[1]?` · WIP ${a.wip[0]} / max ${a.wip[1]}`:''}</p><p class="note">Source: ERP (fictional).</p>`}
+}
+function m4Read(a,m){const bad=m.filter(x=>x.s==='hi').map(x=>x.k),warn=m.filter(x=>x.s==='mid').map(x=>x.k);
+ if(flow(a)>=1)return `${a.name} is the bottleneck (${Math.round(flow(a)*100)}% of takt). Protect it: no waiting, no starving, quick changeovers.${bad.length?' Act first on '+bad.join(' and ')+'.':''}`;
+ if(bad.length)return `Act first on ${bad.join(' and ')}. ${warn.length?'Watch '+warn.join(', ')+'.':''}`;
+ if(warn.length)return `Stable, but watch ${warn.join(', ')}.`;return 'All four Ms are under control.'}
+
+
+/* ---------- photos ---------- */
+let assets=null;(async()=>{try{assets=await window.claude?.use?.('assets')}catch(e){assets=null}})();
+const okSrc=u=>typeof u==='string'&&/^(data:image\/(jpeg|png|webp);base64,|\/_blob\/|photos\/[\w.-]+$|https:\/\/)/.test(u);
+async function shrink(file){try{const img=await createImageBitmap(file),k=Math.min(1,1280/Math.max(img.width,img.height)),c=document.createElement('canvas');c.width=Math.round(img.width*k);c.height=Math.round(img.height*k);c.getContext('2d').drawImage(img,0,0,c.width,c.height);return await new Promise(r=>c.toBlob(b=>r(b||file),'image/jpeg',.72))}catch(e){return file}}
+async function storePhoto(file){const b=await shrink(file);
+ if(typeof SERVER!=='undefined'&&SERVER){const fd=new FormData();fd.append('photo',b,'photo.jpg');const r=await fetch('api/photo',{method:'POST',body:fd});if(!r.ok)throw new Error('upload');return (await r.json()).url}
+ if(assets){const r=await assets.upload(b);return r.url||('/_blob/'+r.id)}
+ return await new Promise((res,rej)=>{const fr=new FileReader();fr.onload=()=>res(fr.result);fr.onerror=rej;fr.readAsDataURL(b)})}
+function toast(msg){let t=$('#toast');if(!t){t=document.createElement('div');t.id='toast';t.setAttribute('role','status');document.body.appendChild(t)}t.textContent=msg;t.hidden=false;clearTimeout(t._h);t._h=setTimeout(()=>t.hidden=true,4000)}
+const CAM='<svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>';
+const GAL='<svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><rect x="4" y="5" width="16" height="14" rx="2"/><path d="M4 16l5-5 4 4 3-3 4 4"/></svg>';
+function thumbs(o,small){const ph=(o.photos||[]).filter(p=>okSrc(p.src));if(!ph.length)return'';return `<div class="thumbs">${ph.map((p,i)=>`<button type="button" class="th${small?' sm':''}" data-lb="${o.id}" data-i="${i}" aria-label="Open photo ${i+1} of ${esc(A[o.area].short)}"><img src="${esc(p.src)}" alt="" loading="lazy"><span class="t">${p.t==='after'?'After':'Before'}</span></button>`).join('')}</div>`}
+let LB=null;
+function openLB(id,i){const o=OBS.find(x=>x.id==id)||NOTES.find(x=>x.id==id);if(!o)return;const ph=(o.photos||[]).filter(p=>okSrc(p.src));if(!ph.length)return;LB={o,ph,i:Math.max(0,Math.min(i,ph.length-1))};drawLB()}
+function drawLB(){let d=$('#lb');if(!d){d=document.createElement('div');d.id='lb';d.setAttribute('role','dialog');d.setAttribute('aria-modal','true');d.setAttribute('aria-label','Photo');document.body.appendChild(d)}
+ const p=LB.ph[LB.i];d.hidden=false;d.innerHTML=`<div class="lbbar"><span>${esc(A[LB.o.area].name)} · ${p.t==='after'?'After':'Before'} · ${esc(new Date(p.at||Date.now()).toLocaleDateString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}))} · ${LB.i+1} / ${LB.ph.length}</span><button type="button" class="ghost" id="lbx" aria-label="Close">✕</button></div>
+ <img src="${esc(p.src)}" alt="Photo of: ${esc(LB.o.text)}"><p class="lbcap">${esc(LB.o.text)}</p>
+ <div class="lbnav"><button type="button" class="ghost" id="lbp" ${LB.i?'':'disabled'} aria-label="Previous photo">◀</button><button type="button" class="ghost" id="lbn" ${LB.i<LB.ph.length-1?'':'disabled'} aria-label="Next photo">▶</button></div>`;
+ $('#lbx').onclick=closeLB;$('#lbp').onclick=()=>{LB.i--;drawLB()};$('#lbn').onclick=()=>{LB.i++;drawLB()};$('#lbx').focus()}
+function closeLB(){const d=$('#lb');if(d)d.hidden=true;LB=null}
+document.addEventListener('keydown',e=>{if(!LB)return;if(e.key==='Escape')closeLB();if(e.key==='ArrowRight'&&LB.i<LB.ph.length-1){LB.i++;drawLB()}if(e.key==='ArrowLeft'&&LB.i>0){LB.i--;drawLB()}});
+document.addEventListener('click',e=>{const b=e.target.closest('[data-lb]');if(b){openLB(b.dataset.lb,+b.dataset.i)}else if(e.target.id==='lb')closeLB()});
+async function addPhotos(files,list,t){let n=0;for(const f of [...files].slice(0,6)){if(!/^image\//.test(f.type))continue;try{list.push({src:await storePhoto(f),t,at:Date.now()});n++}catch(e){toast('A photo could not be saved.')}}return n}
+/* capture photos */
+let DRAFT_PH=[];
+function renderDraftPh(){$('#c-ph').innerHTML=DRAFT_PH.map((p,i)=>`<span class="thw"><img src="${esc(p.src)}" alt="Photo ${i+1}"><button type="button" class="x" data-rm="${i}" aria-label="Remove photo ${i+1}">✕</button></span>`).join('');$$('#c-ph [data-rm]').forEach(b=>b.onclick=()=>{DRAFT_PH.splice(+b.dataset.rm,1);renderDraftPh()})}
+for(const id of ['c-cam','c-gal'])$('#'+id).onchange=async e=>{const b=e.target;$('#c-phs').textContent='Saving photo…';await addPhotos(b.files,DRAFT_PH,'before');b.value='';$('#c-phs').textContent='';renderDraftPh()};
+/* action plan */
+let APV=ls.get('giq_apv','open');
+const PEOPLE={'L. Popa':['Lucia Popa','Shift lead B'],'Training lead':['Elena Rusu','Training lead'],'Shift lead C':['Victor Ciobanu','Shift lead C'],'Logistics':['Andrei Munteanu','Logistics lead'],'Test engineer':['Mihai Lungu','Test engineer'],'SMT engineer':['Diana Cojocaru','SMT engineer'],'Shift lead A':['Sergiu Bodrug','Shift lead A'],'Maintenance':['Pavel Grosu','Maintenance technician'],'Process engineer':['Ana Ursu','Process engineer'],'CI engineer':['Radu Sârbu','CI engineer'],'EHS':['Irina Moraru','EHS specialist'],'Design engineer':['Tudor Racu','Design engineer'],'Shipping lead':['Olga Balan','Shipping lead'],'Shift leader A':['Sergiu Bodrug','Shift lead A']};
+const AREA_LEAD={wh:['Andrei Munteanu','Logistics lead'],smt1:['Diana Cojocaru','SMT engineer'],smt2:['Diana Cojocaru','SMT engineer'],mold:['Ana Ursu','Process engineer'],asm3:['Lucia Popa','Shift lead B'],eol:['Mihai Lungu','Test engineer'],pack:['Olga Balan','Shipping lead']};
+function normOwner(o){if(o.role!==undefined)return;const p=PEOPLE[o.owner];if(p){o.owner=p[0];o.role=p[1]}else if(!o.owner||o.owner==='Unassigned'||o.owner==='Area lead'){const l=AREA_LEAD[o.area];o.owner=l[0];o.role=l[1]}else{const k=Object.values(PEOPLE).find(x=>x[0]===o.owner);o.role=k?k[1]:''}}
+const PRIO={high:['High','hi',0],med:['Medium','mid',1],low:['Low','lo',2]};
+function prioOf(o){if(o.prio&&PRIO[o.prio])return o.prio;const a=A[o.area];if(/safety|ppe|guard|e-stop|exit|spill|trip|injur/i.test(o.text)||(o.cat==='defects'&&a.complaints)||(flow(a)>=1&&o.cat==='waiting'))return'high';if(o.cat==='defects'||o.cat==='waiting'||o.trig==='ecn'||flow(a)>=1)return'med';return'low'}
+const dDate=o=>new Date(T0+o.due*DAY).toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'});
+const isoDate=o=>{const d=new Date(T0+o.due*DAY);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+function renderActions(){OBS.forEach(normOwner);const open=OBS.filter(o=>o.status==='open').sort((x,y)=>PRIO[prioOf(x)][2]-PRIO[prioOf(y)][2]||x.due-y.due),closed=OBS.filter(o=>o.status==='ontime'||o.status==='late').sort((x,y)=>(y.appr==='pending')-(x.appr==='pending')||x.wk-y.wk),pend=closed.filter(o=>o.appr==='pending').length;
+ $('#ap-seg').innerHTML=[['open','Open',open.length],['closed','Closed',closed.length+(pend?` · ${pend} to approve`:'')]].map(([k,v,n])=>`<button type="button" data-v="${k}" aria-pressed="${k===APV}">${v} <span class="cnt">${n}</span></button>`).join('');
+ $$('#ap-seg button').forEach(b=>b.onclick=()=>{APV=b.dataset.v;ls.set('giq_apv',APV);renderActions()});
+ const L=(APV==='open'?open:closed).filter(afOk),canAp=ROLE!=='engineer';
+ renderActDash();const fc=$('#ap-filter');fc.hidden=!AF;fc.innerHTML=AF?`Showing: <strong>${esc(AF.label)}</strong> · ${L.length} action${L.length===1?'':'s'} <button type="button" class="ghost" id="ap-fx">Show all ✕</button>`:'';if(AF)$('#ap-fx').onclick=()=>{AF=null;renderActions()};
+ const gr=o=>{const s=imai(o),n=s.filter(Boolean).length,pr=prioOf(o);return `<details class="gr" data-g="${o.id}"><summary><span class="dots${n===5?' full':''}" aria-hidden="true">${s.map(x=>`<i class="${x?'on':''}"></i>`).join('')}</span> Golden rules ${n}/5${o.status==='open'?' · Edit ›':''}</summary>
+  ${o.status==='open'?`<div class="aedit"><label>Priority</label><div class="seg" role="group" aria-label="Priority">${Object.entries(PRIO).map(([k,v])=>`<button type="button" data-pr="${k}" aria-pressed="${k===pr}">${v[0]}</button>`).join('')}</div>
+  <div class="row"><div><label for="go${o.id}">Responsible (name surname)</label><input id="go${o.id}" data-e="owner" value="${esc(o.owner)}" list="owners"></div><div><label for="gd${o.id}">Due date</label><input id="gd${o.id}" type="date" data-e="due" value="${isoDate(o)}"></div></div></div>`:''}
+  <ol class="grl${n===5?' full':''}">${IMAI.map((r,i)=>`<li class="${s[i]?'on':''}"><b>${r[0]}</b> <span class="note">${r[1]}</span></li>`).join('')}</ol>
+  ${o.status==='open'?`<label class="ck"><input type="checkbox" data-f="gb" ${s[1]?'checked':''}> I looked at the real part, machine or record</label>
+  <label for="gc${o.id}">Containment today</label><input id="gc${o.id}" data-f="cont" value="${esc(o.cont||'')}" placeholder="e.g. 100% check of the next 50 parts">
+  <label for="gr${o.id}">Root cause</label><input id="gr${o.id}" data-f="root" value="${esc(o.root||'')}" placeholder="The process reason, after asking why">
+  <div class="guard" hidden></div><p class="note" style="margin:6px 0 0">Ask: ${esc(WHY[o.cat][0])} ${esc(WHY[o.cat][1])}</p>`:`${o.cont?`<p style="margin:4px 0"><b>Containment:</b> ${esc(o.cont)}</p>`:''}${o.root?`<p style="margin:4px 0"><b>Root cause:</b> ${esc(o.root)}</p>`:''}`}</details>`};
+ const res=o=>o.appr==='pending'?`<span class="mid">Waiting for approval</span>`:o.eff==='yes'?'<span class="lo">Held</span>':o.eff==='no'?'<span class="hi">Did not hold</span>':'To verify';
+ const own=o=>`<strong>${esc(o.owner)}</strong>${o.role?`<span class="arole">${esc(o.role)}</span>`:''}`;
+ const due=o=>`<strong>${dDate(o)}</strong><span class="arole ${overdue(o)?'hi':''}">${dueTxt(o)}</span>`;
+ $('#s-actions').innerHTML=L.map(o=>{const pk=prioOf(o),pr=PRIO[pk],ph=thumbs(o);return `<article class="acard">
+  <div class="ahead"><span class="ptag ${pr[1]}">${pr[0]}</span><span class="aarea">${esc(A[o.area].name)}</span>${o.src==='walk'?'<span class="tag" style="color:var(--steel)">From walk</span>':''}</div>
+  <p class="atext">${esc(o.text)}</p>
+  ${ph?`<div class="alab">Photos</div>${ph}`:''}
+  <dl class="ameta"><div><dt>Responsible</dt><dd><strong>${esc(o.owner)}</strong>${o.role?`<span class="arole">${esc(o.role)}</span>`:''}</dd></div>
+  ${APV==='open'?`<div><dt>Due date</dt><dd><strong>${dDate(o)}</strong><span class="arole ${overdue(o)?'hi':''}">${dueTxt(o)}</span></dd></div>`:`<div><dt>Result</dt><dd>${res(o)}</dd></div>`}</dl>
+  ${gr(o)}
+  <div class="aact"><label class="ghost btnlike" title="Add photo">${CAM}<span>Photo</span><input type="file" accept="image/*" capture="environment" data-ph="${o.id}" hidden></label>${APV==='open'?`<button class="ghost" data-done="${o.id}">Done</button>`:o.appr==='pending'&&canAp?`<button class="ghost" data-ok="${o.id}">Approve</button><button class="ghost" data-re="${o.id}">Reopen</button>`:''}</div></article>`}).join('')||`<p class="empty">No ${APV} actions.</p>`;
+ $$('#s-actions details.gr').forEach(d=>{const o=OBS.find(x=>x.id==d.dataset.g);if(!o)return;if(OPENGR.has(String(o.id)))d.open=true;d.ontoggle=()=>{d.open?OPENGR.add(String(o.id)):OPENGR.delete(String(o.id))};
+  const upd=()=>{const s=imai(o);const full=s.every(Boolean);d.querySelector('summary').innerHTML=`<span class="dots${full?' full':''}" aria-hidden="true">${s.map(x=>`<i class="${x?'on':''}"></i>`).join('')}</span> Golden rules ${s.filter(Boolean).length}/5 · Edit ›`;d.querySelector('.grl').classList.toggle('full',full);d.querySelectorAll('.grl li').forEach((li,i)=>li.classList.toggle('on',s[i]))};
+  d.querySelectorAll('[data-pr]').forEach(b=>b.onclick=()=>{o.prio=b.dataset.pr;saveObs();renderActions();toast('Priority set to '+PRIO[o.prio][0]+'.')});
+  d.querySelectorAll('[data-e]').forEach(inp=>inp.onchange=()=>{if(inp.dataset.e==='owner'){const v=inp.value.trim();if(!v)return;o.owner=v;const k=Object.values(PEOPLE).find(x=>x[0]===v);o.role=k?k[1]:''}else{const t=new Date(inp.value+'T00:00');if(isNaN(t))return;o.due=Math.round((t.getTime()-T0)/DAY)}saveObs();renderActions()});
+  d.querySelectorAll('[data-f]').forEach(inp=>{const f=inp.dataset.f;if(inp.type==='checkbox')inp.onchange=()=>{o.gb=inp.checked;saveObs();upd()};else{inp.oninput=()=>{o[f]=inp.value.trim();upd()};inp.onchange=()=>saveObs();if(f==='root')bindGuard(inp,d.querySelector('.guard'))}})});
+ $$('[data-done]').forEach(b=>b.onclick=()=>{const o=OBS.find(x=>x.id==b.dataset.done);if(!o.root){OPENGR.add(String(o.id));renderActions();const i=$('#gr'+o.id);if(i)i.focus();toast('Rule 4: write the root cause before you close the action.');return}
+  const hasAfter=(o.photos||[]).some(p=>p.t==='after');o.status=o.due<0?'late':'ontime';o.eff='yes';o.std='pending';o.appr='pending';saveObs();renderAll();toast(hasAfter?'Closed. Waiting for approval.':'Closed. Waiting for approval. Tip: add an After photo so the fix can be checked.')});
+ $$('[data-ok]').forEach(b=>b.onclick=()=>{const o=OBS.find(x=>x.id==b.dataset.ok);o.appr='ok';saveObs();renderAll();toast('Approved. The fix now goes to the CI Engineer to become standard.')});
+ $$('[data-re]').forEach(b=>b.onclick=()=>{const o=OBS.find(x=>x.id==b.dataset.re);o.status='open';delete o.appr;o.eff='pending';o.std='n/a';saveObs();renderAll();toast('Reopened.')});
+ $$('#s-actions [data-ph]').forEach(inp=>inp.onchange=async()=>{const o=OBS.find(x=>x.id==inp.dataset.ph);if(!o)return;o.photos=o.photos||[];toast('Saving photo…');const n=await addPhotos(inp.files,o.photos,o.status==='open'&&!(o.photos.length)?'before':'after');inp.value='';if(n){saveObs();renderActions();renderZone();toast(n===1?'Photo attached.':n+' photos attached.')}})}
+const OPENGR=new Set();
+/* ---------- Action dashboard ---------- */
+let ADT=ls.get('giq_adt','overview'),AF=null;if(!['overview','area','pareto'].includes(ADT))ADT='overview';
+const afOk=o=>!AF||(AF.k==='area'?o.area===AF.v:AF.k==='owner'?o.owner===AF.v:AF.k==='prio'?prioOf(o)===AF.v:o.cat===AF.v);
+function setAF(k,v,label){AF=AF&&AF.k===k&&AF.v===v?null:{k,v,label};renderActions();if(AF){toast('Action list: '+label);}}
+function tipOn(root){const t=$('#ctip')||document.body.appendChild(Object.assign(document.createElement('div'),{id:'ctip',role:'tooltip',hidden:true}));
+ root.querySelectorAll('[data-tip]').forEach(el=>{el.onpointerenter=el.onpointermove=e=>{t.textContent=el.dataset.tip;t.hidden=false;const x=Math.min(e.clientX+12,innerWidth-t.offsetWidth-8),y=e.clientY-t.offsetHeight-12;t.style.left=Math.max(8,x)+'px';t.style.top=(y<8?e.clientY+16:y)+'px'};el.onpointerleave=()=>{t.hidden=true}})}
+function adData(){const acts=OBS.filter(o=>o.status!=='none'&&o.wk<=7),open=OBS.filter(o=>o.status==='open');return{acts,open}}
+function renderActDash(){const box=$('#ad');if(!box)return;const{acts,open}=adData(),late=open.filter(overdue),hi=open.filter(o=>prioOf(o)==='high'),cl=acts.filter(o=>o.status==='ontime'||o.status==='late'),ont=cl.length+late.length?acts.filter(o=>o.status==='ontime').length/(cl.length+late.length):1,ap=OBS.filter(o=>o.appr==='pending').length;
+ $('#ad-kpi').innerHTML=`<span class="adb ${late.length?'hi':'lo'} push" title="Open actions past their due date"><b>${late.length}</b> late</span><span class="adb ${ont>=1?'lo':'bl'}" title="Actions closed on time, last 8 weeks"><b>${pct(ont)}</b> on time</span>`;
+ const tabs=[['overview','Overview'],['area','By area'],['pareto','Pareto']];
+ $('#ad-tabs').innerHTML=tabs.map(([k,l])=>`<button type="button" role="tab" aria-selected="${k===ADT}" data-t="${k}">${l}</button>`).join('');
+ $$('#ad-tabs button').forEach(b=>b.onclick=()=>{ADT=b.dataset.t;ls.set('giq_adt',ADT);renderActDash()});
+ drawAD()}
+function drawAD(){const c=$('#ad-chart');if(!c||!c.clientWidth&&$('#ad').closest('[hidden]'))return;const W=Math.max(280,c.clientWidth||600);const{acts,open}=adData();let h='';
+ if(ADT==='overview'){const ks=['high','med','low'],d=ks.map(k=>({k,n:open.filter(o=>prioOf(o)===k).length,l:open.filter(o=>prioOf(o)===k&&overdue(o)).length})),tot=open.length||1,R=Math.max(60,Math.min(100,Math.floor((W-(W<560?168:196))/2)-6)),r=Math.round(R*.62),S=2*R+8,cx=S/2,cy=S/2;let a0=-Math.PI/2;
+  const arc=(a1,a2)=>{const big=a2-a1>Math.PI?1:0,p=(a,rr)=>[cx+Math.cos(a)*rr,cy+Math.sin(a)*rr].map(v=>v.toFixed(2)).join(' ');return `M${p(a1,R)}A${R} ${R} 0 ${big} 1 ${p(a2,R)}L${p(a2,r)}A${r} ${r} 0 ${big} 0 ${p(a1,r)}Z`};
+  const col={high:'var(--red)',med:'var(--amber)',low:'var(--green)'};
+  const segs=d.filter(x=>x.n).map(x=>{const a1=a0,a2=a0+x.n/tot*2*Math.PI;a0=a2;return `<path d="${x.n===tot?`M${cx} ${cy-R}A${R} ${R} 0 1 1 ${cx-.01} ${cy-R}L${cx-.01} ${cy-r}A${r} ${r} 0 1 0 ${cx} ${cy-r}Z`:arc(a1,a2)}" fill="${col[x.k]}" stroke="var(--panel)" stroke-width="2" class="hit" data-f="prio:${x.k}" data-tip="${PRIO[x.k][0]}: ${x.n} open (${pct(x.n/tot)}), ${x.l} late" style="cursor:pointer"/>`}).join('');
+  h=`<p class="note" style="margin:0 0 8px">Open actions by priority. Tap a slice or a line to see those actions in the list.</p>
+  <div class="ov"><svg width="${S}" height="${S}" role="img" aria-label="Open actions by priority">${segs}<text x="${cx}" y="${cy-6}" text-anchor="middle" class="ovn" style="font-size:${R<80?28:34}px">${open.length}</text><text x="${cx}" y="${cy+(R<80?14:16)}" text-anchor="middle" class="ax">open actions</text></svg>
+  <ul class="ovl">${d.map(x=>`<li><button type="button" class="hit" data-f="prio:${x.k}"><i style="background:${col[x.k]}"></i><span><b>${PRIO[x.k][0]}</b><small>${x.l?`${x.l} late`:'none late'}<span class="ovp"> · ${pct(x.n/tot)}</span></small></span><strong>${x.n}</strong><em>${pct(x.n/tot)}</em></button></li>`).join('')}</ul></div>`}
+ if(ADT==='pareto'){const g={};acts.forEach(o=>g[o.cat]=(g[o.cat]||0)+1);const L=Object.entries(g).sort((a,b)=>b[1]-a[1]),tot=acts.length||1;let cum=0,vital=[];const rows=L.map(([k,n])=>{const before=cum;cum+=n;const v=before===0||cum/tot<=.8;if(v)vital.push(CATS[k]);return{k,n,cum:cum/tot,v}});
+  const lw=Math.min(130,W*.32),rw=58,bw=Math.min(460,W-lw-rw-40),mx=Math.max(...rows.map(r=>r.n)),RH=34,H=rows.length*RH+8;
+  h=`<p class="note" style="margin:0 0 8px">All actions from the last 8 weeks by waste type. <strong>${esc(vital.join(', '))}</strong> make up ${pct(rows.filter(r=>r.v).reduce((s,r)=>s+r.n,0)/tot)} of them: fix these first (the vital few).</p>
+  <svg width="${W}" height="${H}" role="img" aria-label="Pareto of actions by waste type">${rows.map((r,i)=>{const y=i*RH+4,w=Math.max(4,r.n/mx*bw);return `<g class="hit" data-f="cat:${r.k}" data-tip="${CATS[r.k]}: ${r.n} actions (${pct(r.n/tot)}) · cumulative ${pct(r.cum)}" style="cursor:pointer"><rect x="0" y="${y}" width="${W}" height="${RH-2}" fill="transparent"/>
+   <text x="${lw-8}" y="${y+RH/2+1}" text-anchor="end" dominant-baseline="middle" class="ax">${CATS[r.k]}</text>
+   <path d="M${lw} ${y+6}h${w-4}a4 4 0 0 1 4 4v${RH-22}a4 4 0 0 1-4 4h-${w-4}z" fill="${r.v?'var(--c1)':'var(--cmute)'}"/>
+   <text x="${lw+w+6}" y="${y+RH/2+1}" dominant-baseline="middle" class="val">${r.n}</text>
+   <text x="${lw+bw+rw}" y="${y+RH/2+1}" text-anchor="end" dominant-baseline="middle" class="ax">${pct(r.cum)}</text></g>`}).join('')}
+   <line x1="${lw}" x2="${lw}" y1="0" y2="${H}" class="base"/></svg>
+  <div class="adleg"><span><i style="background:var(--c1)"></i>Vital few (up to 80%)</span><span><i style="background:var(--cmute)"></i>Others</span><span class="note">Right column: cumulative %</span></div>
+  ${dtable(['Waste type','Actions','Share','Cumulative'],rows.map(r=>[CATS[r.k],r.n,pct(r.n/tot),pct(r.cum)]))}`}
+ if(ADT==='area'){const R=Math.max(70,Math.min(140,W/2-88)),S=2*R+90,cx=W/2,cy=S/2,n=AREAS.length,d=AREAS.map(a=>({a,o:open.filter(o=>o.area===a.id).length,l:open.filter(o=>o.area===a.id&&overdue(o)).length})),mx=Math.max(2,...d.map(x=>x.o)),ang=i=>-Math.PI/2+i*2*Math.PI/n,P=(i,v)=>[cx+Math.cos(ang(i))*R*v/mx,cy+Math.sin(ang(i))*R*v/mx],poly=k=>d.map((x,i)=>P(i,x[k]).map(v=>v.toFixed(1)).join(',')).join(' ');
+  const rings=[.25,.5,.75,1].map(f=>`<polygon points="${d.map((_,i)=>P(i,mx*f).join(',')).join(' ')}" class="grid"/>`).join(''),spokes=d.map((_,i)=>`<line x1="${cx}" y1="${cy}" x2="${P(i,mx)[0]}" y2="${P(i,mx)[1]}" class="grid"/>`).join('');
+  const lab=d.map((x,i)=>{const[lx,ly]=P(i,mx*1.16),anc=Math.abs(lx-cx)<8?'middle':lx>cx?'start':'end';return `<g class="hit" data-f="area:${x.a.id}" data-tip="${x.a.name}: ${x.o} open, ${x.l} late" style="cursor:pointer"><circle cx="${P(i,mx)[0]}" cy="${P(i,mx)[1]}" r="22" fill="transparent"/><text x="${lx}" y="${ly-8}" text-anchor="${anc}" dominant-baseline="middle" class="val">${esc(x.a.short)}</text><text x="${lx}" y="${ly+9}" text-anchor="${anc}" dominant-baseline="middle" class="ax">${x.o} open${x.l?` · ${x.l} late`:''}</text></g>`}).join('');
+  const dots=(k,cl)=>d.map((x,i)=>`<circle cx="${P(i,x[k])[0]}" cy="${P(i,x[k])[1]}" r="4.5" fill="${cl}" stroke="var(--panel)" stroke-width="2" pointer-events="none"/>`).join('');
+  const worst=[...d].sort((a,b)=>b.o-a.o||b.l-a.l)[0];
+  h=`<p class="note" style="margin:0 0 8px">Open actions per sector (blue) and how many are late (red). The further out, the bigger the load. <strong>${esc(worst.a.name)}</strong> carries the most: ${worst.o} open, ${worst.l} late. Tap a sector to filter the list.</p>
+  <svg width="${W}" height="${S}" role="img" aria-label="Spider chart of open and late actions by sector">${rings}${spokes}
+   <polygon points="${poly('o')}" fill="color-mix(in srgb,var(--c1) 12%,transparent)" stroke="var(--c1)" stroke-width="2" stroke-linejoin="round"/>
+   <polygon points="${poly('l')}" fill="color-mix(in srgb,var(--c2) 12%,transparent)" stroke="var(--c2)" stroke-width="2" stroke-linejoin="round"/>${dots('o','var(--c1)')}${dots('l','var(--c2)')}${lab}</svg>
+  <div class="adleg"><span><i style="background:var(--c1)"></i>Open</span><span><i style="background:var(--c2)"></i>Late</span><span class="note">Rings: ${[.25,.5,.75,1].map(f=>Math.round(mx*f*10)/10).join(' / ')}</span></div>
+  ${dtable(['Sector','Open','Late'],d.map(x=>[x.a.name,x.o,x.l]))}`}
+ c.innerHTML=h;tipOn(c);c.querySelectorAll('[data-f]').forEach(g=>g.onclick=()=>{const[k,...r]=g.dataset.f.split(':'),v=r.join(':');setAF(k,v,k==='area'?A[v].name:k==='cat'?CATS[v]:k==='prio'?PRIO[v][0]+' priority':v)});
+ if(!window._adRO){window._adRO=new ResizeObserver(()=>{const w=$('#ad-chart').clientWidth;if(w&&w!==window._adW){window._adW=w;drawAD()}});window._adRO.observe(c)}}
+const dtable=(hd,rows)=>`<details class="dt"><summary>Data table</summary><table><thead><tr>${hd.map((x,i)=>`<th${i?' class="n"':''}>${x}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map((x,i)=>`<td${i?' class="n"':''}>${esc(x)}</td>`).join('')}</tr>`).join('')}</tbody></table></details>`;
+
+
+/* ---------- Supervisor ---------- */
+function renderSupervisor(){
+ const ranked=RANKED();
+ $('#s-4m').innerHTML=`<thead><tr><th>Sector</th><th>Man</th><th>Machine</th><th>Material</th><th>Method</th><th class="n">Cycle / takt</th><th class="n">WIP / max</th></tr></thead><tbody>${[...AREAS].sort((x,y)=>flow(y)-flow(x)).map(a=>{const m=fourM(a);return `<tr data-a="${a.id}" class="${flow(a)>=1?'bn':''}" style="cursor:pointer"><td><strong>${esc(a.short)}</strong>${flow(a)>=1?' <span class="tag hi">Bottleneck</span>':''}</td>${m.map(x=>`<td><span class="dot" style="background:${col[x.s]}"></span>${esc(x.b)}</td>`).join('')}<td class="n ${flowLvl(a)}">${Math.round(flow(a)*100)}%</td><td class="n ${a.wip[1]&&a.wip[0]>a.wip[1]?'hi':''}">${a.wip[1]?a.wip[0]+' / '+a.wip[1]:'–'}</td></tr>`}).join('')}</tbody>`;
+ $$('#s-4m tr[data-a]').forEach(r=>r.onclick=()=>selectZone(r.dataset.a,true));
+ $('#s-rank').innerHTML=ranked.map((r,i)=>`<li data-a="${r.a.id}" class="${r.a.id===ZONE?'sel':''}"><span class="num" style="${i<3?'':'background:transparent;color:var(--muted);border:1px solid var(--line)'}">${i+1}</span>
+  <div><strong>${esc(r.a.name)}</strong><div class="chips">${r.reasons.slice(0,3).map(x=>`<span class="chip">${esc(x)}</span>`).join('')||'<span class="chip">Stable</span>'}</div><button type="button" class="linkb" data-walk="${r.a.id}">Start walk here →</button></div><span class="score ${lvl(r.score)}">${r.score}</span></li>`).join('');
+ $$('#s-rank li').forEach(li=>li.onclick=()=>selectZone(li.dataset.a,true));
+ if(!$('#c-area').options.length)$('#c-area').innerHTML=AREAS.map(a=>`<option value="${a.id}">${esc(a.name)}</option>`).join('');
+ $('#c-area').value=ZONE;
+ renderActions();
+}
+let draft=null;
+$('#cap').onsubmit=e=>{e.preventDefault();const t=$('#c-text').value.trim();if(!t){$('#c-text').focus();return}
+ const area=$('#c-area').value,cat=classify(t),trig=trigOf(t);draft={area,shift:$('#c-shift').value,text:t,cat,trig};
+ const s=$('#c-sugg');s.hidden=false;const n=OBS.filter(o=>o.area===area&&o.trig===trig).length;
+ s.innerHTML=`<h3>Gemba IQ reads this as</h3>
+ <div class="row"><div><label for="d-cat">Waste type</label><select id="d-cat">${Object.entries(CATS).map(([k,v])=>`<option value="${k}" ${k===cat?'selected':''}>${v}</option>`).join('')}</select></div>
+ <div><label for="d-due">Due in</label><select id="d-due"><option value="1">1 day</option><option value="3" selected>3 days</option><option value="7">1 week</option></select></div></div>
+ ${trig!=='none'?`<p style="margin:10px 0 0"><span class="tag">${TRIG[trig]}</span> ${n?`linked to ${n} earlier observation${n>1?'s':''} in this area.`:'first time seen in this area.'}</p>`:''}
+ <label>Five whys to ask on the spot</label><ol id="d-why">${WHY[cat].map(w=>`<li>${esc(w)}</li>`).join('')}</ol>
+ <label for="d-act">Suggested action</label><textarea id="d-act">${esc(ACT[cat])}</textarea>
+ <div class="row"><div><label for="d-own">Responsible (name surname)</label><input id="d-own" placeholder="e.g. Ana Ursu" list="owners"></div><div><label for="d-pr">Priority</label><select id="d-pr">${Object.entries(PRIO).map(([k,v])=>`<option value="${k}" ${k===prioOf({area:draft.area,cat,trig,text:draft.text})?'selected':''}>${v[0]}</option>`).join('')}</select></div></div>
+ <div class="btns"><button type="button" id="d-add">Create action</button><button type="button" class="ghost ai" id="d-ai">Ask AI for a deeper read</button></div>
+ <div class="out" id="d-out"></div>`;
+ $('#d-cat').onchange=()=>{const c=$('#d-cat').value;$('#d-why').innerHTML=WHY[c].map(w=>`<li>${esc(w)}</li>`).join('');$('#d-act').value=ACT[c]};
+ $('#d-add').onclick=()=>{OBS.push({id:1000+Date.now()%1e6,wk:0,area:draft.area,shift:draft.shift,cat:$('#d-cat').value,trig:draft.trig,text:draft.text,owner:$('#d-own').value.trim()||'Unassigned',prio:$('#d-pr').value,due:+$('#d-due').value,status:'open',eff:'pending',std:'n/a',photos:DRAFT_PH.slice()});
+  DRAFT_PH=[];renderDraftPh();saveObs();$('#c-text').value='';s.hidden=true;APV='open';location.hash=ROLE+'-actions'};
+ $('#d-ai').onclick=()=>{const a=A[draft.area],m=fourM(a).map(x=>`${x.k}: ${x.t}`).join('\n'),hist=OBS.filter(o=>o.area===draft.area).slice(-6).map(o=>`- ${o.text} (${CATS[o.cat]})`).join('\n');
+  askAI(`${plain}\nArea: ${a.name}. Cycle ${a.ct} s vs takt ${TAKT} s. 4M today:\n${m}\nRecent observations here:\n${hist}\nNew observation (shift ${draft.shift}): "${draft.text}"\nGive: 1) waste type (TIMWOODS) and which M it belongs to, 2) two most likely root causes, 3) containment for today, 4) permanent fix and how to check it worked.`,$('#d-out'),$('#d-ai'))}};
+
+/* ---------- CI Engineer ---------- */
+let SCOPE=ls.get('giq_scope','all');
+function renderEngKPIs(){const act=PROJ.filter(p=>p.status==='progress'||p.status==='verify'),late=PROJ.filter(p=>p.e<0&&p.status!=='standard'),std=PROJ.filter(p=>p.status==='standard'),avg=act.length?act.reduce((s,p)=>s+progress(p),0)/act.length:0;
+ $('#e-kpis').innerHTML=[['Active projects',act.length,''],['Past due date',late.length,late.length?'hi':'lo'],['Standardized, 10 wk',std.length,'lo'],['Avg progress to target',pct(avg),'']].map(([t,v,c])=>`<div class="card"><span class="note">${t}</span><b class="${c}">${v}</b></div>`).join('')}
+function renderGantt(){
+ $('#e-scope').innerHTML=[['all','All sectors'],['zone',A[ZONE].short]].map(([k,v])=>`<button type="button" data-s="${k}" aria-pressed="${k===SCOPE}">${esc(v)}</button>`).join('');
+ $$('#e-scope button').forEach(b=>b.onclick=()=>{SCOPE=b.dataset.s;ls.set('giq_scope',SCOPE);renderGantt()});
+ const list=PROJ.filter(p=>SCOPE==='all'||p.area===ZONE).sort((a,b)=>a.s-b.s),lo=Math.min(...PROJ.map(p=>p.s)),hi=Math.max(...PROJ.map(p=>p.e))+1,span=hi-lo,X=w=>(w-lo)/span*100;
+ const C={idea:'var(--muted)',planned:'var(--amber)',progress:'var(--steel)',verify:'#f2b705',standard:'var(--green)'};
+ $('#e-gantt').innerHTML=`<div class="legend" style="margin:0 0 8px">${STAGES.map(s=>`<span><i style="background:${C[s[0]]}"></i>${s[1]}</span>`).join('')}<span><i style="background:var(--acc);width:3px"></i>This week</span></div>
+ <div class="gantt">${list.map(p=>`<div class="gr ${SCOPE==='all'&&p.area!==ZONE?'':''}"><div><strong>${esc(p.title)}</strong><div class="note">${esc(A[p.area].short)} · ${esc(p.method)} · ${esc(p.owner)}</div></div>
+ <div class="gt" title="${esc(p.title)}: ${wkTxt(p.s)} to ${wkTxt(p.e)}"><i style="left:${X(p.s)}%;width:${Math.max(2,X(p.e+1)-X(p.s))}%;background:${C[p.status]};${p.area===ZONE?'outline:2px solid var(--ink)':''}"></i><em style="left:${X(0)}%"></em></div></div>`).join('')||'<p class="empty">No projects in this sector.</p>'}</div>
+ <div class="gr" style="margin-top:4px"><div></div><div class="note" style="display:flex;justify-content:space-between"><span>${-lo} wk ago</span><span>now</span><span>in ${hi-1} wk</span></div></div>`}
+let KBST=ls.get('giq_kbst','progress');
+function renderKanban(){const nar=innerWidth<600;
+ $('#e-kbsel').hidden=!nar;
+ $('#e-kbsel').innerHTML=STAGES.map(([k,v])=>`<button type="button" data-k="${k}" aria-pressed="${k===KBST}">${v} <span class="cnt">${PROJ.filter(p=>p.status===k).length}</span></button>`).join('');
+ $$('#e-kbsel button').forEach(b=>b.onclick=()=>{KBST=b.dataset.k;ls.set('giq_kbst',KBST);renderKanban()});
+ $('#e-kb').style.gridTemplateColumns=nar?'minmax(0,1fr)':'';
+ $('#e-kb').innerHTML=STAGES.map(([k,v],si)=>{const l=PROJ.filter(p=>p.status===k);if(nar&&k!==KBST)return '';return `<div class="col" data-k="${k}"><h3>${v}<span class="note">${l.length}</span></h3>${l.map(p=>`<div class="kc ${p.area===ZONE?'hl':''}" draggable="true" data-id="${p.id}"><strong>${esc(p.title)}</strong>
+ <div class="note">${esc(A[p.area].short)} · ${esc(p.owner)} · <span class="${p.e<0&&k!=='standard'?'hi':''}">due ${wkTxt(p.e)}</span></div>
+ <div style="font-size:13px;margin-top:4px">${esc(p.kpi)}: ${p.cur} → ${p.target}</div><div class="prog"><i style="width:${Math.round(progress(p)*100)}%"></i></div>
+ <div class="mv"><button class="ghost" data-mv="-1" aria-label="Move ${esc(p.title)} back" ${si===0?'disabled':''}>◀</button><button class="ghost" data-mv="1" aria-label="Move ${esc(p.title)} forward" ${si===STAGES.length-1?'disabled':''}>▶</button></div></div>`).join('')}</div>`}).join('');
+ const move=(id,to)=>{const p=PROJ.find(x=>x.id===id);if(!p||p.status===to)return;p.status=to;if(innerWidth<600){KBST=to;ls.set('giq_kbst',KBST)}saveKb();renderKanban();renderGantt();renderEngKPIs();if(ROLE==='engineer')renderZone()};
+ $$('.kc [data-mv]').forEach(b=>b.onclick=()=>{const id=b.closest('.kc').dataset.id,p=PROJ.find(x=>x.id===id),i=STAGES.findIndex(s=>s[0]===p.status)+ +b.dataset.mv;if(STAGES[i])move(id,STAGES[i][0])});
+ $$('.kc').forEach(c=>c.ondragstart=e=>e.dataTransfer.setData('text/plain',c.dataset.id));
+ $$('.col').forEach(c=>{c.ondragover=e=>{e.preventDefault();c.classList.add('over')};c.ondragleave=()=>c.classList.remove('over');c.ondrop=e=>{e.preventDefault();c.classList.remove('over');move(e.dataTransfer.getData('text/plain'),c.dataset.k)}});
+}
+function patterns(){const g={};for(const o of OBS.filter(o=>o.wk<=7)){const k1=o.area+'|cat|'+o.cat;(g[k1]=g[k1]||[]).push(o);if(o.trig!=='none'){const k2=o.area+'|trig|'+o.trig;(g[k2]=g[k2]||[]).push(o)}}
+ return Object.entries(g).map(([k,l])=>{const[area,type,val]=k.split('|');return{k,area,type,val,list:l,shifts:new Set(l.map(o=>o.shift)).size}}).filter(p=>p.list.length>=3&&p.shifts>=2).sort((a,b)=>b.list.length-a.list.length)}
+let selPat=null;
+function renderEngineer(){
+ renderEngKPIs();renderGantt();renderKanban();
+ const P=patterns();
+ const cnt=(a,c)=>OBS.filter(o=>o.area===a&&o.cat===c&&o.wk<=7).length,max=Math.max(1,...AREAS.flatMap(a=>Object.keys(CATS).map(c=>cnt(a.id,c))));
+ $('#e-heat').innerHTML=`<thead><tr><th>Area</th>${Object.values(CATS).map(v=>`<th>${v}</th>`).join('')}</tr></thead><tbody>${AREAS.map(a=>`<tr><td>${esc(a.short)}</td>${Object.keys(CATS).map(c=>{const n=cnt(a.id,c);return `<td style="background:color-mix(in srgb,var(--red) ${n?15+Math.round(n/max*60):0}%,transparent)">${n||''}</td>`}).join('')}</tr>`).join('')}</tbody>`;
+ const label=p=>`${A[p.area].name}: ${p.type==='cat'?CATS[p.val]:TRIG[p.val]}`;
+ if(!selPat||!P.find(p=>p.k===selPat))selPat=P[0]?.k||null;
+ $('#e-pats').innerHTML=P.map(p=>{const w=p.list.map(o=>o.wk),nh=p.list.filter(o=>o.eff==='no').length;return `<div class="pat ${p.k===selPat?'sel':''}" data-k="${esc(p.k)}" tabindex="0" role="button"><strong>${esc(label(p))}</strong>
+  <div class="chips"><span class="chip">${p.list.length} times</span><span class="chip">${p.shifts} shifts</span><span class="chip">over ${Math.max(...w)-Math.min(...w)+1} weeks</span>${nh?`<span class="chip hi">${nh} fix${nh>1?'es':''} did not hold</span>`:''}</div></div>`}).join('')||'<p class="empty">No recurring issues.</p>';
+ $$('.pat').forEach(d=>{const go=()=>{selPat=d.dataset.k;renderEngineer()};d.onclick=go;d.onkeydown=e=>{if(e.key==='Enter')go()}});
+ const p=P.find(x=>x.k===selPat);
+ if(!p){$('#e-rca').innerHTML='<p class="empty">Select a pattern.</p>'}else{
+  const mainCat=Object.entries(p.list.reduce((m,o)=>(m[o.cat]=(m[o.cat]||0)+1,m),{})).sort((a,b)=>b[1]-a[1])[0][0],tried=p.list.filter(o=>o.status==='ontime'||o.status==='late');
+  $('#e-rca').innerHTML=`<h3>${esc(label(p))}</h3>
+  <label>Evidence</label><ul style="margin:0;padding-left:20px">${p.list.map(o=>`<li>${esc(o.text)} <span class="note">· shift ${o.shift}, ${o.wk?o.wk+' wk ago':'this week'}</span></li>`).join('')}</ul>
+  <label>What was tried before</label>${tried.length?`<ul style="margin:0;padding-left:20px">${tried.map(o=>`<li>${esc(o.owner)}: ${o.eff==='yes'?'<span class="lo">held</span>':o.eff==='no'?'<span class="hi">did not hold</span>':'not yet verified'}</li>`).join('')}</ul>`:'<p class="empty">Nothing closed yet.</p>'}
+  <label>Five whys for the team</label><ol style="margin:0;padding-left:20px">${WHY[mainCat].map(w=>`<li>${esc(w)}</li>`).join('')}</ol>
+  <p style="margin:12px 0 0"><strong>Hypothesis:</strong> ${p.list.filter(o=>o.trig==='changeover').length>=p.list.length/2?'the changeover standard has no verification step, so each shift fixes the symptom and the gap stays open.':'the fix was local to one shift and was never written into the standard.'}</p>
+  <div class="btns"><button class="ghost ai" id="r-ai">Ask AI for root-cause hypotheses</button></div><div class="out" id="r-out"></div>`;
+  const b=$('#r-ai');b.onclick=()=>askAI(`${plain}\nRecurring issue in ${A[p.area].name} (${p.type==='cat'?CATS[p.val]:TRIG[p.val]}), seen ${p.list.length} times on ${p.shifts} shifts:\n${p.list.map(o=>`- shift ${o.shift}: ${o.text}${o.status!=='open'?' (fix held: '+o.eff+')':''}`).join('\n')}\nGive 3 root-cause hypotheses ranked by likelihood, the quickest way to test each on the floor, and which standard should change.`,$('#r-out'),b)}
+ const L=OBS.filter(o=>o.eff==='yes'&&o.std==='pending');
+ $('#e-loop').innerHTML=L.length?`<table class="stack"><thead><tr><th>Area</th><th>Fix that worked</th><th>Owner</th><th></th></tr></thead><tbody>${L.map(o=>`<tr><td>${esc(A[o.area].short)}</td><td>${esc(o.text)}<div class="out note" id="std-${o.id}"></div></td><td>${esc(o.owner)}</td><td><div class="btns" style="margin:0"><button class="ghost" data-draft="${o.id}">Draft update</button><button data-std="${o.id}">Mark updated</button></div></td></tr>`).join('')}</tbody></table>`:'<p class="empty">Every working fix is in the standard.</p>';
+ $$('[data-draft]').forEach(b=>b.onclick=()=>{const o=OBS.find(x=>x.id==b.dataset.draft),out=$('#std-'+o.id);
+  if(ai)askAI(`${plain}\nWrite a short update for the work instruction or checklist of ${A[o.area].name} so this fix becomes standard. Fix that worked: "${o.text}" (${CATS[o.cat]}). Give: document to change, the new step in one sentence, how the supervisor checks it at Gemba.`,out,b);
+  else out.textContent=`Document: ${o.trig==='changeover'?'changeover checklist':'station work instruction'}, ${A[o.area].name}.\nNew step: ${ACT[o.cat]}\nGemba check: supervisor confirms the step on the next three walks.`});
+ $$('[data-std]').forEach(b=>b.onclick=()=>{OBS.find(x=>x.id==b.dataset.std).std='updated';saveObs();renderAll()});
+}
+
+/* ---------- Plant Manager ---------- */
+function areaIQ(a,P){const l=OBS.filter(o=>o.area===a.id&&o.wk<=7),inP=new Set(P.flatMap(p=>p.list.map(o=>o.id)));
+ const cov=Math.min(a.walks4/4,1),conv=l.length?l.filter(o=>o.status!=='none').length/l.length:1,closed=l.filter(o=>o.status==='ontime'||o.status==='late'),od=l.filter(overdue);
+ const ont=(closed.length+od.length)?l.filter(o=>o.status==='ontime').length/(closed.length+od.length):1,rep=l.length?l.filter(o=>inP.has(o.id)).length/l.length:0;
+ return{a,n:l.length,cov,conv,ont,rep,iq:Math.round(100*(.25*cov+.25*conv+.3*ont+.2*(1-rep)))}}
+let PLANT=0,PLANT_D=0,M_SUB='';
+function renderManager(){
+ const P=patterns(),R=AREAS.map(a=>areaIQ(a,P)),tot=R.reduce((s,r)=>s+r.n,0)||1,w=k=>R.reduce((s,r)=>s+r[k]*r.n,0)/tot;
+ const plant=Math.round(R.reduce((s,r)=>s+r.iq*r.n,0)/tot),trend=[-9,-8,-7,-7,-5,-3,-2,0].map(d=>plant+d);PLANT=plant;PLANT_D=plant-trend[0];
+ const worst=[...R].sort((a,b)=>a.iq-b.iq)[0];
+ $('#m-big').textContent=plant;
+ const m=[['Walk coverage (target 4 per area / 4 wk)',w('cov')],['Observations turned into actions',w('conv')],['Actions closed on time',w('ont')],['Issues that did not repeat',1-w('rep')]],sm=[...m].sort((a,b)=>b[1]-a[1]);
+ const lowOee=[...AREAS].map(a=>({a,o:prod(a).oee})).sort((x,y)=>x.o-y.o)[0];
+ M_SUB=`Lowest OEE now: ${lowOee.a.name} at ${pct(lowOee.o)}. Weakest Gemba habit: ${sm[3][0].toLowerCase()} (${pct(sm[3][1])}). Lowest area score: ${worst.a.name} at ${worst.iq}.`;
+ $('#m-meters').innerHTML=m.map(([t,v])=>`<div class="meter"><div><span>${t}</span><strong>${pct(v)}</strong></div><div class="bar"><i style="width:${Math.round(v*100)}%"></i></div></div>`).join('');
+ $('#m-areas').innerHTML=`<thead><tr><th>Area</th><th class="n">Gemba IQ</th><th class="n">OEE</th><th class="n">Walks, 4 wk</th><th class="n">Obs → action</th><th class="n">On time</th><th class="n">Repeat share</th></tr></thead><tbody>${[...R].sort((a,b)=>a.iq-b.iq).map(r=>`<tr data-a="${r.a.id}" style="cursor:pointer"><td>${esc(r.a.name)}</td><td class="n"><strong class="${r.iq<60?'hi':r.iq<75?'mid':'lo'}">${r.iq}</strong></td><td class="n ${oeeLvl(prod(r.a).oee)}">${pct(prod(r.a).oee)}</td><td class="n">${r.a.walks4}</td><td class="n">${pct(r.conv)}</td><td class="n">${pct(r.ont)}</td><td class="n">${pct(r.rep)}</td></tr>`).join('')}</tbody>`;
+ $$('#m-areas tr[data-a]').forEach(r=>r.onclick=()=>selectZone(r.dataset.a,true));
+ $('#m-shifts').innerHTML=`<thead><tr><th>Shift</th><th class="n">Observations</th><th class="n">Closed</th><th class="n">On time</th></tr></thead><tbody>${['A','B','C'].map(s=>{const l=OBS.filter(o=>o.shift===s&&o.wk<=7),c=l.filter(o=>o.status==='ontime'||o.status==='late'),od=l.filter(overdue).length,ok=l.filter(o=>o.status==='ontime').length;return `<tr><td>Shift ${s}</td><td class="n">${l.length}</td><td class="n">${c.length}</td><td class="n">${c.length+od?pct(ok/(c.length+od)):'–'}</td></tr>`}).join('')}</tbody>`;
+ const weak=r=>[['walk coverage',r.cov],['turning observations into actions',r.conv],['on-time closure',r.ont],['stopping repeats',1-r.rep]].sort((a,b)=>a[1]-b[1])[0][0];
+ $('#m-next').innerHTML=[`<li style="margin-bottom:8px"><strong>${esc(lowOee.a.name)}</strong>: OEE ${pct(lowOee.o)}. Open the sector on the map to see what happened.</li>`,...[...R].sort((a,b)=>a.iq-b.iq).slice(0,2).map(r=>`<li style="margin-bottom:8px"><strong>${esc(r.a.name)}</strong> (${r.iq}): work on ${weak(r)}.</li>`)].join('');
+ const s=$('#m-svg'),draw=()=>{const W=s.clientWidth,H=s.clientHeight;if(!W)return;const p={l:34,r:14,t:16,b:30},lo=Math.min(...trend)-5,hi=Math.max(...trend)+5;
+  const X=i=>p.l+i*(W-p.l-p.r)/(trend.length-1),Y=v=>p.t+(hi-v)*(H-p.t-p.b)/(hi-lo),narrow=W<420,ticks=[lo,Math.round((lo+hi)/2),hi].map(Math.round);
+  s.innerHTML=ticks.map(t=>`<line x1="${p.l}" x2="${W-p.r}" y1="${Y(t)}" y2="${Y(t)}" stroke="var(--line)"/><text x="${p.l-6}" y="${Y(t)+4}" text-anchor="end" style="font:12px Barlow,sans-serif;fill:var(--muted)">${t}</text>`).join('')
+  +`<polyline points="${trend.map((v,i)=>X(i)+','+Y(v)).join(' ')}" fill="none" stroke="var(--steel)" stroke-width="3"/>`
+  +trend.map((v,i)=>`<circle cx="${X(i)}" cy="${Y(v)}" r="${i===trend.length-1?6:3.5}" fill="${i===trend.length-1?'#f2b705':'var(--steel)'}" stroke="var(--panel)" stroke-width="2"/>`).join('')
+  +trend.map((v,i)=>(!narrow||i%2===1)?`<text x="${X(i)}" y="${H-8}" text-anchor="middle" style="font:12px Barlow,sans-serif;fill:var(--muted)">${i===trend.length-1?'Now':'W-'+(trend.length-1-i)}</text>`:'').join('')
+  +`<text x="${X(trend.length-1)-10}" y="${Y(plant)-12}" text-anchor="end" style="font:700 15px 'Barlow Semi Condensed',sans-serif;fill:var(--ink)">${plant}</text>`};
+ if(!window._giqRO){window._giqRO=new ResizeObserver(draw);window._giqRO.observe(s)}draw();
+}
+const MTABS=$$('#m-tabs [role=tab]');
+function setMTab(id,focus){MTABS.forEach(t=>{const on=t.id===id;t.setAttribute('aria-selected',on);t.tabIndex=on?0:-1;$('#'+t.getAttribute('aria-controls')).hidden=!on;if(on&&focus)t.focus()});ls.set('giq_mtab',id)}
+MTABS.forEach((t,i)=>{t.onclick=()=>setMTab(t.id);t.onkeydown=e=>{const k={ArrowRight:1,ArrowLeft:-1}[e.key];if(k){e.preventDefault();setMTab(MTABS[(i+k+MTABS.length)%MTABS.length].id,true)}}});
+{const s=ls.get('giq_mtab',null);if(s&&$('#'+s))setMTab(s)}
+
+/* ---------- titles + routing ---------- */
+function setTitle(){
+ const top=RANKED()[0].a,bn=[...AREAS].sort((x,y)=>flow(y)-flow(x))[0];
+ if(ROLE==='supervisor'){$('#title').textContent=`Walk ${top.name} first today`;$('#sub').textContent=`Bottleneck now: ${bn.name} at ${Math.round(flow(bn)*100)}% of takt. ${RANKED().filter(r=>r.score>=30).length} of ${AREAS.length} sectors need a look; the yellow route covers the top three in about 35 minutes.`}
+ if(ROLE==='engineer'){const P=patterns(),inP=new Set(P.flatMap(p=>p.list.map(o=>o.id))),rep=OBS.filter(o=>inP.has(o.id)),co=rep.filter(o=>o.trig==='changeover').length,pc=rep.length?Math.round(co/rep.length*100):0,act=PROJ.filter(p=>p.status==='progress'||p.status==='verify').length;
+  $('#title').textContent=pc>=50?`Changeovers sit behind ${pc}% of repeat issues`:'Repeat issues and improvement work';$('#sub').textContent=`${P.length} recurring patterns in 8 weeks · ${act} improvement projects running · ${PROJ.filter(p=>p.e<0&&p.status!=='standard').length} past their due date.`}
+ if(ROLE==='manager'){$('#title').textContent=`Plant Gemba IQ ${PLANT}: ${PLANT_D>=0?'up':'down'} ${Math.abs(PLANT_D)} points in 8 weeks`;$('#sub').textContent=M_SUB}
+}
+function renderAll(){renderManager();renderSupervisor();renderEngineer();renderMap();renderZone();renderFeat();setTitle();renderHome();buildMenu();renderBnav()}
+const IC={cam:'M4 8h3l2-3h6l2 3h3v11H4zM12 16.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z',home:'M4 11l8-7 8 7v9h-5v-6h-6v6H4z',plus:'M12 5v14M5 12h14',walk:'M8 3.5a1.5 1.5 0 1 0 0 .1M7 21l2-6 3 3v3M5 12l2-4h4l3 4 3 1M9 8l-1 5',cal:'M4 6h16v14H4zM4 10h16M8 3v5M16 3v5M8 14h2M14 14h2M8 17h2',map:'M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2zM9 4v14M15 6v14',grid:'M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z',route:'M6 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM18 9a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM8 17h7a3 3 0 0 0 0-6H9a3 3 0 0 1 0-6h7',pen:'M4 20h4L19 9l-4-4L4 16v4zM13 7l4 4',check:'M4 12l5 5L20 6',gauge:'M4 16a8 8 0 1 1 16 0M12 16l4-5',time:'M4 6h10M7 12h13M4 18h8',kanban:'M4 4h4v16H4zM10 4h4v10h-4zM16 4h4v6h-4z',heat:'M4 4h16v16H4zM4 10h16M4 15h16M10 4v16M15 4v16',repeat:'M17 2l3 3-3 3M4 11V9a4 4 0 0 1 4-4h12M7 22l-3-3 3-3M20 13v2a4 4 0 0 1-4 4H4',loop:'M4 12a8 8 0 0 1 14-5l2 2M20 12a8 8 0 0 1-14 5l-2-2M20 4v5h-5M4 20v-5h5',table:'M4 5h16v14H4zM4 10h16M10 10v9',arrow:'M5 12h14M13 6l6 6-6 6',info:'M12 21.5a9.5 9.5 0 1 0 0-19 9.5 9.5 0 0 0 0 19zM12 16.5v-5M12 7.5h.01',reset:'M4 4v6h6M5 15a8 8 0 1 0 1-7l-2 2'};
+const ROLE_NAMES={supervisor:'Supervisor',engineer:'CI Engineer',manager:'Plant Manager'};
+function SECS(){const P=patterns(),open=OBS.filter(o=>o.status==='open'),od=open.filter(overdue).length,bn=[...AREAS].sort((x,y)=>flow(y)-flow(x))[0];return{
+ supervisor:[['home','Home','home',''],['map','Plant map','map',A[ZONE].short],['gwalk','Gemba walk','walk',WCUR?'In progress':''],['history','Walk history','time',allWalks().filter(w=>w.at>=T0-14*DAY).length+''],['4m','4M board','grid',flow(bn)>=1?'Bottleneck: '+bn.short:''],['walk','Walk plan','route','Top 3'],['sched','Walk schedule','cal',(()=>{const L=lsw();return L.done+' / '+L.due})()],['capture','Capture observation','pen',''],['actions','Action plan','check',open.length+(od?` · ${od} late`:'')],['info','About & help','info','']],
+ engineer:[['home','Home','home',''],['map','Plant map','map',A[ZONE].short],['gwalk','Gemba walk','walk',WCUR?'In progress':''],['history','Walk history','time',allWalks().filter(w=>w.at>=T0-14*DAY).length+''],['dash','Improvement dashboard','gauge',''],['timeline','Timeline','time',PROJ.length+''],['kanban','Kanban','kanban',PROJ.filter(active).length+' open'],['waste','Waste map','heat',''],['repeat','Repeat issues & root cause','repeat',P.length+''],['loop','Close the loop','loop',OBS.filter(o=>o.eff==='yes'&&o.std==='pending').length+''],['capture','Capture observation','pen',''],['actions','Action plan','check',open.length+(od?` · ${od} late`:'')],['info','About & help','info','']],
+ manager:[['home','Home','home',''],['map','Plant map','map',A[ZONE].short],['gwalk','Gemba walk','walk',WCUR?'In progress':''],['history','Walk history','time',allWalks().filter(w=>w.at>=T0-14*DAY).length+''],['score','Gemba IQ score','gauge',PLANT+''],['breakdown','By area · by shift','table',''],['next','Next best moves','arrow','4'],['sched','Walk schedule','cal',(()=>{const L=lsw();return L.done+' / '+L.due})()],['capture','Capture observation','pen',''],['actions','Action plan','check',open.length+(od?` · ${od} late`:'')],['info','About & help','info','']]}}
+let SEC='map';
+let MROLE=null;
+function menuSecs(r){const L=SECS()[r],cur=r===ROLE;
+ return `<div class="who">Sections · ${ROLE_NAMES[r]}${cur?'':' <span class="pv">preview</span>'}</div>${L.filter(x=>x[0]!=='info'&&x[0]!=='capture').map(([k,t,ic,h])=>`<a href="#${r}-${k}" ${cur&&k===SEC?'aria-current="page"':''}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="${IC[ic]}"/></svg><span>${esc(t)}</span><small>${esc(h)}</small></a>`).join('')}`}
+function previewRole(r){if(r===MROLE)return;MROLE=r;$$('#menu .roles button').forEach(b=>b.setAttribute('aria-checked',b.dataset.r===r));$('#menu-secs').innerHTML=menuSecs(r);$('#menu-info').href='#'+r+'-info';bindMenuLinks()}
+function bindMenuLinks(){$$('#menu a[href^="#"]:not(#resetDemo)').forEach(a=>a.onclick=()=>closeMenu(false))}
+function buildMenu(){MROLE=ROLE;const L=SECS()[ROLE];
+ $('#menu').innerHTML=`<div class="grp"><div class="who">Viewing as</div><div class="roles" role="radiogroup" aria-label="Role">${ROLES.map(r=>`<button type="button" role="radio" data-r="${r}" aria-checked="${r===ROLE}">${ROLE_NAMES[r]}</button>`).join('')}</div></div>
+ <div class="grp" id="menu-secs">${menuSecs(ROLE)}</div>
+ <div class="grp"><a id="menu-info" href="#${ROLE}-info" ${SEC==='info'?'aria-current="page"':''}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="${IC.info}"/></svg><span>About &amp; help</span><small>Glossary</small></a><a href="#" id="resetDemo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="${IC.reset}"/></svg><span>Reset demo data</span><small></small></a></div>`;
+ $$('#menu .roles button').forEach(b=>{const r=b.dataset.r;
+  b.onmouseenter=()=>previewRole(r);b.onfocus=()=>previewRole(r);
+  b.onclick=()=>previewRole(r);
+  b.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();previewRole(r);$('#menu-secs a').focus()}}});
+ bindMenuLinks();
+ $('#resetDemo').onclick=e=>{e.preventDefault();try{['giq_obs','giq_kb','giq_ptab','giq_mtab','giq_scope','giq_apv'].forEach(k=>localStorage.removeItem(k))}catch(x){}
+  OBS=OBS.filter(o=>o.id<1000);D.obs.forEach(r=>{const o=OBS.find(x=>x.id===r[0]);Object.assign(o,{status:r[9],eff:r[10],std:r[11]});delete o.photos});D.projects.forEach(p=>{PROJ.find(x=>x.id===p[0]).status=p[7]});resetFeat();saveObs();saveKb();closeMenu(true);renderAll()};
+ const L2=L.find(x=>x[0]===SEC);$('#where').textContent=L2?L2[1]:(SEC==='info'?'About & help':'');$('#rolePill').textContent=ROLE_NAMES[ROLE]}
+function openMenu(focusRoles){$('#menu').hidden=false;$('#scrim').hidden=false;$('#menuBtn').setAttribute('aria-expanded','true');(focusRoles?$('#menu .roles [aria-checked=true]'):($('#menu a[aria-current]')||$('#menu a'))).focus()}
+function closeMenu(focusBtn){if(MROLE!==ROLE&&!$('#menu').hidden){MROLE=null;buildMenu()}$('#menu').hidden=true;$('#scrim').hidden=true;$('#menuBtn').setAttribute('aria-expanded','false');if(focusBtn)$('#menuBtn').focus()}
+$('#menuBtn').onclick=()=>$('#menu').hidden?openMenu():closeMenu(true);
+$('#rolePill').onclick=()=>openMenu(true);
+$('#scrim').onclick=()=>closeMenu(true);
+document.addEventListener('keydown',e=>{if($('#menu').hidden)return;if(e.key==='Escape'){closeMenu(true);return}
+ if(e.key==='ArrowDown'||e.key==='ArrowUp'){const f=$$('#menu button,#menu a'),i=f.indexOf(document.activeElement);e.preventDefault();f[(i+(e.key==='ArrowDown'?1:-1)+f.length)%f.length].focus()}});
+
+const GLOSS=[['Gemba','Japanese for "the real place": where the work is done, the shop floor.'],['Gemba walk','Leaders go to the floor to see, ask and learn. The aim is to understand the process, not to blame people.'],['4M','Man, Machine, Material, Method: the four sources of process variation (from the Ishikawa diagram).'],['TIMWOODS','The 8 wastes of Lean: Transport, Inventory, Motion, Waiting, Overproduction, Overprocessing, Defects, Skills (unused talent).'],['Takt time','Available time divided by customer demand: the pace the plant must produce at (48 s in this demo).'],['Cycle time (CT)','The time a sector needs to finish one unit.'],['Bottleneck','The sector with the highest cycle time against takt. It limits the output of the whole plant.'],['WIP','Work in progress: parts waiting between process steps.'],['OEE','Overall Equipment Effectiveness = Availability × Performance × Quality.'],['A · P · Q','Availability (time running vs planned), Performance (speed vs plan), Quality (good parts): the three parts of OEE.'],['FPY','First Pass Yield: the % of units that are good the first time, without rework.'],['Scrap','Parts thrown away because they cannot be repaired.'],['Attainment','Actual output divided by planned output.'],['Changeover','Switching a line from one product or variant to another.'],['SMED','Single-Minute Exchange of Die: methods to shorten changeovers, for example preparing the next setup while the line still runs.'],['Poka-yoke','Mistake-proofing: a device or check that makes an error impossible or immediately visible.'],['5S','Sort, Set in order, Shine, Standardize, Sustain: a method to organize the workplace.'],['Kanban','A visual signal or board that controls flow, so work is pulled only when it is needed.'],['Pull','Producing only what the next step or the customer has asked for.'],['Standard work','The agreed best way to do a job, written down and followed by everyone.'],['PDCA','Plan, Do, Check, Act: the basic improvement cycle.'],['DMAIC','Define, Measure, Analyse, Improve, Control: the Six Sigma problem-solving method.'],['VSM','Value Stream Mapping: drawing the whole material and information flow to find waste.'],['5 Why','Asking "why" again and again (about five times) to get from the symptom to the root cause.'],['Root cause','The real reason a problem happens. Fixing it stops the problem from coming back.'],['Andon','A signal, such as a light or a board, that shows the status of a line and calls for help.'],['ECN','Engineering Change Notice: an approved change to a product or a process.'],['Deviation','A temporary, approved exception from the standard process.'],['KPI','Key Performance Indicator: the number that shows whether a goal is met.'],['CI','Continuous Improvement.'],['MES','Manufacturing Execution System: tracks production on the floor in real time.'],['QMS','Quality Management System: defects, complaints and quality records.'],['PLM','Product Lifecycle Management: product data and engineering changes.'],['ERP','Enterprise Resource Planning: orders, stock, materials and planning.'],['CMMS','Computerized Maintenance Management System: maintenance requests and work.'],['WO / SO','Work Order (a production order) / Sales Order (a customer order).'],['SMT','Surface-Mount Technology: placing electronic components on circuit boards.'],['AOI','Automated Optical Inspection of circuit boards.'],['EOL','End-of-line: the final test before packing.'],['EHS','Environment, Health and Safety.'],['Shift A / B / C','Morning, afternoon and night shift.'],['Gembutsu','The real thing: the actual part, machine or record where the problem is.'],['5 golden rules (Imai)','Go to gemba, check the gembutsu, contain the problem now, find the root cause, standardize so it does not come back.'],['Containment','A temporary action that protects the customer now, for example a 100% check, until the root cause is fixed.'],['Go · See · Think · Do','The four parts of a walk report: where you went, what you saw, what you think causes it, what you will do next.'],['Leader standard work','The planned routine of a leader, including which areas to walk and when.'],['Kamishibai','A board of cards for planned checks or walks. A card turns green when done and red when missed.'],['Muda · Mura · Muri','Waste · unevenness · overburden: the three things Lean removes.'],['DOWNTIME','Another name for the 8 wastes: Defects, Overproduction, Waiting, Non-used talent, Transport, Inventory, Motion, Extra processing.'],['Time study','Timing several real cycles at a station to compare them with the standard and with takt.'],['Process, not person','The Gemba rule that problems come from the system, so we fix the process and do not blame people.']];
+function renderGloss(q){q=(q||'').trim().toLowerCase();const l=GLOSS.filter(g=>!q||(g[0]+' '+g[1]).toLowerCase().includes(q));$('#gloss').innerHTML=l.map(g=>`<dt>${esc(g[0])}</dt><dd>${esc(g[1])}</dd>`).join('')||'<dd class="empty">No term found.</dd>'}
+renderGloss('');if(innerWidth<600)$$('.info details').forEach(d=>d.open=false);$('#gq').oninput=e=>renderGloss(e.target.value);
+$$('#info-toc [data-go]').forEach(b=>b.onclick=()=>{const t=$('#'+b.dataset.go);if(t.tagName==='DETAILS')t.open=true;t.scrollIntoView({block:'start',behavior:'smooth'})});
+$('#infoBtn').onclick=()=>{location.hash=ROLE+'-info'};
+{const br=$('header .brand');br.setAttribute('role','link');br.tabIndex=0;br.style.cursor='pointer';br.title='Home';br.onclick=()=>{location.hash=ROLE+'-home'};br.onkeydown=e=>{if(e.key==='Enter')br.click()}}
+/* ================= Gemba walk · 5 golden rules · walk schedule ================= */
+const DAY=864e5,T0=(()=>{const d=new Date();d.setHours(0,0,0,0);return d.getTime()})(),TDOW=(new Date().getDay()+6)%7,WK0=T0-TDOW*DAY;
+const DAYN=['Mon','Tue','Wed','Thu','Fri'];
+let NID=0;const newId=()=>1000+(Date.now()%1e6)*10+(NID++%10);
+const THEMES={
+ flow:{n:'Flow & bottleneck',why:'Is the sector keeping pace with takt, and what stops the flow?',q:[['Station runs at takt: no waiting, no pile-up','waiting'],['WIP is within the marked maximum','inventory'],['Material is at point of use: no searching','motion'],['Andon calls are answered within the agreed time','waiting'],['Work is balanced: no overburden (Muri) or uneven pace (Mura)','waiting']]},
+ quality:{n:'Quality',why:'Are defects stopped at the source, and does everyone know the top problems?',q:[['First-piece check is done and signed after the last changeover','defects'],['Defect board is up to date for this shift','defects'],['Reject parts are separated and labelled (red box)','defects'],['Operators know the top 3 defects of their station','skills'],['Gauges and testers have a valid calibration label','defects']]},
+ standard:{n:'Standard work',why:'Is the work done the agreed way, and is the standard current?',q:[['Work instruction is at the station, current revision','skills'],['Operator follows the sequence in the instruction','overprocessing'],['Changeover is done with the checklist','defects'],['Skills matrix shows the operator is certified here','skills'],['The last engineering change is in the instruction','skills']]},
+ waste:{n:'Waste walk (TIMWOODS)',why:'Look for the 8 wastes, one by one.',q:[['No parts moved more than needed (Transport)','transport'],['WIP and stock at or under the limit (Inventory)','inventory'],['No walking, reaching or searching (Motion)','motion'],['No people or machines waiting (Waiting)','waiting'],['Producing only what is ordered (Overproduction)','overproduction'],['No double checks or extra steps (Overprocessing)','overprocessing'],['No defects or rework seen (Defects)','defects'],['People\'s ideas and skills are used (Skills)','skills']]},
+ safety:{n:'Safety',why:'Can people work here without risk today?',q:[['PPE is worn and right for the task','skills'],['Walkways and emergency exits are free','transport'],['Guards, light curtains and e-stops are in place and work','defects'],['No spills, loose cables or trip hazards','motion'],['Near-misses are reported and visible on the board','skills']]},
+ '5s':{n:'5S & visual',why:'Can a stranger see in 30 seconds if the station is normal or not?',q:[['Only needed items at the station (Sort)','inventory'],['Every tool has a marked place (Set in order)','motion'],['Station and machine are clean, no leaks (Shine)','defects'],['Floor marking and labels are clear (Standardize)','transport'],['Last 5S audit is posted and its actions are done (Sustain)','skills']]},
+ people:{n:'People & respect',why:'Does the team know the target, and can they raise problems?',q:[['Team knows today\'s target and where they stand','skills'],['Last shift\'s problems were discussed at start-up','skills'],['Improvement ideas are collected and answered','skills'],['Operators can stop the line or call for help without fear','skills'],['New operators have a visible training plan','skills']]}};
+function suggestTheme(a){const m=fourM(a),s=k=>m.find(x=>x.k===k).s;
+ if(flow(a)>=1)return['flow',`cycle ${a.ct} s is above takt ${TAKT} s`];
+ if(a.scrap[0]>a.scrap[1]*1.05||a.fpy<97)return['quality',`scrap ${a.scrap[0]}% vs ${a.scrap[1]}% average`];
+ if(a.wip[1]&&a.wip[0]>a.wip[1])return['waste',`WIP ${a.wip[0]} is over the max of ${a.wip[1]}`];
+ if(s('Method')==='hi'||(a.ecn!==null&&a.ecn<=7))return['standard',a.ecn!==null&&a.ecn<=7?`engineering change ${a.ecn} days ago`:`standard work audit ${a.meth.audit}%`];
+ if(a.newOps)return['people',`${a.newOps} new operator${a.newOps>1?'s':''}`];
+ if(flow(a)>=.95)return['flow',`cycle ${a.ct} s is close to takt`];
+ return['5s','no red flags: keep the basics strong']}
+const ASK=['What are you working on now?','What should happen here?','What gets in the way?','How do you know you are on target?','What would make this easier?'];
+const OKIND={concern:['Concern','hi'],waste:['Waste seen','mid'],good:['Good practice','lo'],idea:['Idea','st']};
+const BLAME=/\b(he|she|they|operator|worker|employee|someone|somebody|guy|leader|person|people)\b[^.!?]{0,40}\b(forgot|forget|didn'?t|did not|does ?n[o']t|ignored?|refused?|failed|was late|not paying attention|mistake|wrong)\b|\b(lazy|careless|fault|negligen\w*|stupid|incompetent|blame\w*|sloppy|a uitat|nu a respectat|neaten\w*|vina|lene\w*)\b/i;
+function guardHTML(t){return BLAME.test(t||'')?`<strong>Process, not person.</strong> This reads like it is about a person. Describe the process: what in the method, material, machine or training let this happen?<br><span class="note">Example: "Operator forgot the check" → "The check is not on the changeover checklist".</span>`:''}
+function bindGuard(ta,box){const f=()=>{const h=guardHTML(ta.value);box.innerHTML=h;box.hidden=!h};ta.addEventListener('input',f);f()}
+const IMAI=[['Go to gemba','Go to the place where it happened.'],['Check gembutsu','Look at the real part, machine or record.'],['Contain now','Take a temporary countermeasure on the spot.'],['Find root cause','Ask why until you reach the cause.'],['Standardize','Change the standard so it does not come back.']];
+function imai(o){const legacy=o.id<1000&&o.status!=='open';return[true,!!(o.gb||(o.photos||[]).some(p=>p.t!=='after')||legacy),!!(o.cont||legacy),!!(o.root||legacy),o.std==='done']}
+const ROTA=[[['eol','supervisor'],['smt1','supervisor'],['mold','engineer']],[['asm3','supervisor'],['smt2','supervisor'],['eol','engineer']],[['mold','supervisor'],['pack','supervisor'],['eol','manager']],[['wh','supervisor'],['smt1','supervisor'],['asm3','engineer']],[['eol','supervisor'],['smt2','supervisor'],['mold','manager']]];
+/* data */
+const okWalk=w=>w&&typeof w==='object'&&A[w.area]&&THEMES[w.theme]&&typeof w.at==='number';
+let WALKS=(ls.get('giq_walks',[])||[]).filter(okWalk),NOTES=(ls.get('giq_notes',[])||[]).filter(n=>n&&A[n.area]&&OKIND[n.k]),CTO=ls.get('giq_ct',{})||{},WCUR=ls.get('giq_wcur',null),VIEW=null,HVIEW=null;
+if(WCUR&&!okWalk(WCUR))WCUR=null;
+function persist(k,v){ls.set('giq_'+k,v);if(k!=='wcur'&&typeof SERVER!=='undefined'&&SERVER)api('api/kv/'+k,'PUT',v)}
+const SEEDW=(()=>{let s=7;const rnd=()=>(s=(s*16807)%2147483647)/2147483647,th=Object.keys(THEMES),out=[];
+ for(let back=1;back<=11;back++){const day=T0-back*DAY,dow=(new Date(day).getDay()+6)%7;if(dow>4)continue;
+  ROTA[dow].forEach(([ar,role],j)=>{const a=A[ar];if(back<a.walk||rnd()<.1)return;const theme=j===0?suggestTheme(a)[0]:th[Math.floor(rnd()*th.length)],n=THEMES[theme].q.length,ans={};
+   for(let i=0;i<n;i++)ans[i]=rnd()<.78?'y':rnd()<.8?'n':'na';out.push({id:'s'+back+j,seed:true,at:day+(8+j*2)*36e5,end:day+(8+j*2)*36e5+(15+Math.floor(rnd()*20))*6e4,area:ar,shift:'A',role,theme,ans,note:{},obs:[],ts:{laps:[]},refl:{},acts:[]})})}
+ return out})();
+const allWalks=()=>[...SEEDW,...WALKS].sort((x,y)=>y.at-x.at);
+function applyWalks(){AREAS.forEach(a=>{if(!a._b)a._b={walk:a.walk,walks4:a.walks4,ct:a.ct};a.walk=a._b.walk;a.walks4=a._b.walks4;a.ct=typeof CTO[a.id]==='number'&&CTO[a.id]>0?CTO[a.id]:a._b.ct});
+ for(const w of WALKS){const a=A[w.area],d=Math.max(0,Math.floor((T0-new Date(w.at).setHours(0,0,0,0))/DAY));if(d<28)a.walks4++;a.walk=Math.min(a.walk,d)}}
+applyWalks();
+function loadKV(kv){if(Array.isArray(kv.walks))WALKS=kv.walks.filter(okWalk);if(Array.isArray(kv.notes))NOTES=kv.notes.filter(n=>n&&A[n.area]&&OKIND[n.k]);if(kv.ct&&typeof kv.ct==='object')CTO=kv.ct;applyWalks()}
+function resetFeat(){WALKS=[];NOTES=[];CTO={};WCUR=null;VIEW=null;OBS.forEach(o=>{delete o.cont;delete o.root;delete o.gb;delete o.appr;delete o.prio;delete o.role});OBS.forEach(normOwner);persist('walks',[]);persist('notes',[]);persist('ct',{});try{localStorage.removeItem('giq_wcur')}catch(e){}applyWalks()}
+const score=w=>{const v=Object.values(w.ans||{}),y=v.filter(x=>x==='y').length,n=v.filter(x=>x==='n').length;return y+n?y/(y+n):null};
+const dstr=t=>{const d=new Date(t);return d.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'})+', '+d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})};
+const mins=w=>Math.max(1,Math.round(((w.end||Date.now())-w.at)/6e4));
+/* schedule (Kamishibai) */
+function schedCells(){const W=allWalks(),out=[];ROTA.forEach((l,di)=>l.forEach(([ar,role])=>{const day=WK0+di*DAY,w=W.find(w=>w.area===ar&&w.at>=day&&w.at<day+DAY);
+ out.push({di,ar,role,w,st:w?'done':di<TDOW?'missed':di===TDOW?'due':'plan'})}));return out}
+function lsw(){const c=schedCells(),due=c.filter(x=>x.di<TDOW||(x.di===TDOW&&x.w)),done=due.filter(x=>x.st==='done').length;return{c,due:due.length,done,missed:c.filter(x=>x.st==='missed').length}}
+function renderSched(){const box=$('#sc-board');if(!box)return;const L=lsw();
+ $('#sc-sum').innerHTML=`<div class="kv"><div><small>Done so far this week</small><b class="${L.due&&L.done/L.due<.8?'hi':'lo'}">${L.done} / ${L.due}</b></div><div><small>Missed</small><b class="${L.missed?'hi':'lo'}">${L.missed}</b></div><div><small>Planned this week</small><b>${L.c.length}</b></div><div><small>Extra walks (not planned)</small><b>${allWalks().filter(w=>w.at>=WK0&&!L.c.some(x=>x.w===w)).length}</b></div></div>`;
+ box.innerHTML=DAYN.map((d,di)=>`<div class="kday${di===TDOW?' now':''}"><h3>${d}${di===TDOW?' · today':''}</h3>${L.c.filter(x=>x.di===di).map(x=>{const lab={done:'Done',missed:'Missed',due:'Due today',plan:'Planned'}[x.st];
+  return `<button type="button" class="kcard ${x.st}" data-sc="${x.st==='done'?'v:'+x.w.id:x.st==='plan'?'':'s:'+x.ar+':'+x.role}" ${x.st==='plan'?'disabled':''}><b>${esc(A[x.ar].short)}</b><span>${ROLE_NAMES[x.role]}</span><em>${lab}${x.w?' · '+(score(x.w)===null?'–':pct(score(x.w))):''}</em></button>`}).join('')}</div>`).join('');
+ $$('#sc-board [data-sc]').forEach(b=>b.onclick=()=>{const v=b.dataset.sc;if(!v)return;if(v[0]==='v'){openHist(v.slice(2))}else{const[,ar,role]=v.split(':');startSetup(ar,role)}})}
+/* walk UI */
+let SETUP={area:null,theme:null,role:null},CANCEL=0,TIMER=null,TS0=null,LAST=null;
+function startSetup(ar,role){ZONE=ar;SETUP={area:ar,theme:null,role:role||ROLE};VIEW=null;if(location.hash!=='#'+ROLE+'-gwalk')location.hash=ROLE+'-gwalk';else renderWalk()}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-walk]');if(b){e.stopPropagation();e.preventDefault();startSetup(b.dataset.walk)}},true);
+const saveCur=()=>persist('wcur',WCUR);
+function stopTimer(){clearInterval(TIMER);TIMER=null}
+function renderWalk(){const box=$('#gw');if(!box)return;stopTimer();
+ if(VIEW){const w=allWalks().find(x=>x.id==VIEW);if(w){box.innerHTML=reportHTML(w,true);bindReport(w,box);document.body.classList.remove('walking');return}VIEW=null}
+ if(typeof renderBnav==='function'&&$('#bnav'))document.body.classList.toggle('walking',SEC==='gwalk'&&!!WCUR);
+ if(!WCUR){renderSetup(box)}else renderActive(box)}
+function renderSetup(box){const ar=SETUP.area||ZONE,a=A[ar],[sg,why]=suggestTheme(a),th=SETUP.theme||sg,role=SETUP.role||ROLE;
+ box.innerHTML=`<div class="card" style="max-width:820px"><h2>Start a Gemba walk</h2><p class="note" style="margin:4px 0 0">Go and see, ask why, show respect. The walk takes 15–30 minutes and ends with a short report.</p>
+ <div class="row"><div><label for="w-area">Area</label><select id="w-area">${AREAS.map(x=>`<option value="${x.id}" ${x.id===ar?'selected':''}>${esc(x.name)}</option>`).join('')}</select></div>
+ <div class="row" style="gap:10px"><div><label for="w-shift">Shift</label><select id="w-shift"><option>A</option><option>B</option><option>C</option></select></div><div><label for="w-role">Walked by</label><select id="w-role">${ROLES.map(r=>`<option value="${r}" ${r===role?'selected':''}>${ROLE_NAMES[r]}</option>`).join('')}</select></div></div></div>
+ <label>Focus of this walk</label><div class="themes" role="radiogroup" aria-label="Walk focus">${Object.entries(THEMES).map(([k,t])=>`<button type="button" role="radio" aria-checked="${k===th}" data-th="${k}"><b>${esc(t.n)}</b>${k===sg?'<span class="tag" style="color:var(--steel)">Suggested</span>':''}<small>${t.q.length} checks</small></button>`).join('')}</div>
+ <p class="note" style="margin:8px 0 0">Suggested for ${esc(a.short)}: <strong>${esc(THEMES[sg].n)}</strong>, because ${esc(why)}. Purpose of this focus: ${esc(THEMES[th].why)}</p>
+ <div class="brief"><h3>Before you go</h3><ol><li><strong>Go to the real place</strong> and look at the real thing: the part, the machine, the board.</li><li><strong>Process, not person.</strong> Ask what in the system lets the problem happen. Nobody is blamed.</li><li><strong>Ask, do not tell.</strong> ${ASK.slice(1,4).map(esc).join(' ')}</li><li><strong>Close the loop.</strong> Thank the team and tell them what happens next.</li></ol></div>
+ <div class="btns"><button type="button" id="w-start">Start walk</button></div></div>`;
+ $('#w-area').onchange=e=>{SETUP={...SETUP,area:e.target.value,theme:null};renderWalk()};
+ $('#w-role').onchange=e=>{SETUP.role=e.target.value};
+ $$('.themes [data-th]').forEach(b=>b.onclick=()=>{SETUP={...SETUP,area:$('#w-area').value,theme:b.dataset.th};renderWalk()});
+ $('#w-start').onclick=()=>{WCUR={id:'w'+Date.now(),at:Date.now(),area:$('#w-area').value,shift:$('#w-shift').value,role:$('#w-role').value,theme:th,ans:{},note:{},own:{},act:{},obs:[],ts:{laps:[],use:true},refl:{},thanked:false,step:0,qi:0};SETUP={area:null,theme:null,role:null};saveCur();renderWalk();renderMenuOnly();renderBnav();window.scrollTo(0,0)}}
+const ctOk=(a,avg)=>avg>=a._b.ct*.5&&avg<=a._b.ct*2;
+const STEPS=['Checklist','Observe','Time study','Reflect'];
+const buzz=()=>{try{navigator.vibrate&&navigator.vibrate(12)}catch(e){}};
+function nofixHTML(w,i){return `<div class="nofix"><label for="wn${i}">What did you see?</label><input id="wn${i}" data-n="${i}" value="${esc(w.note[i]||'')}" placeholder="Short fact, about the process"><div class="guard" id="wg${i}" hidden></div><div class="row"><div><label for="wo${i}">Owner</label><input id="wo${i}" data-o="${i}" value="${esc(w.own[i]||'')}" placeholder="Name surname (default: area lead)" list="owners"></div><div><label class="ck"><input type="checkbox" data-a="${i}" ${w.act[i]!==false?'checked':''}> Create an action</label></div></div></div>`}
+function bindNofix(w){$$('#w-body [data-n]').forEach(inp=>{inp.oninput=()=>{w.note[inp.dataset.n]=inp.value;saveCur()};bindGuard(inp,$('#wg'+inp.dataset.n))});
+ $$('#w-body [data-o]').forEach(inp=>inp.oninput=()=>{w.own[inp.dataset.o]=inp.value;saveCur()});
+ $$('#w-body [data-a]').forEach(c=>c.onchange=()=>{w.act[c.dataset.a]=c.checked;saveCur()})}
+const shiftNow=()=>{const h=new Date().getHours();return h>=6&&h<14?'A':h>=14&&h<22?'B':'C'};
+const BN=[['home','Home','home'],['map','Map','map'],['gwalk','Walk','plus'],['capture','Capture','cam'],['actions','Actions','check']];
+
+/* ---------- Home ---------- */
+const HOME_KPI={
+ supervisor:()=>{const bn=[...AREAS].sort((x,y)=>flow(y)-flow(x))[0],L=lsw(),td=L.c.filter(x=>x.di===TDOW),late=OBS.filter(overdue).length,ap=OBS.filter(o=>o.appr==='pending').length;
+  return[['Bottleneck',`${bn.short} ${Math.round(flow(bn)*100)}%`,flow(bn)>=1?'hi':'lo','4m'],['Walks today',`${td.filter(x=>x.st==='done').length} / ${td.length}`,'','sched'],['Late actions',late,late?'hi':'lo','actions'],['To approve',ap,ap?'mid':'lo','actions']]},
+ engineer:()=>{const P=patterns(),act=PROJ.filter(p=>p.status==='progress'||p.status==='verify').length,late=PROJ.filter(p=>p.e<0&&p.status!=='standard').length,std=OBS.filter(o=>o.eff==='yes'&&o.std==='pending').length;
+  return[['Active projects',act,'','kanban'],['Repeat issues',P.length,P.length?'hi':'lo','repeat'],['To standardize',std,std?'mid':'lo','loop'],['Past due',late,late?'hi':'lo','timeline']]},
+ manager:()=>{const lo=[...AREAS].map(a=>({a,o:prod(a).oee})).sort((x,y)=>x.o-y.o)[0],L=lsw(),ap=OBS.filter(o=>o.appr==='pending').length;
+  return[['Gemba IQ',PLANT,PLANT<60?'hi':PLANT<75?'mid':'lo','score'],['Lowest OEE',`${lo.a.short} ${pct(lo.o)}`,oeeLvl(lo.o),'map'],['Leader walks',`${L.done} / ${L.due}`,L.missed?'mid':'lo','sched'],['To approve',ap,ap?'mid':'lo','actions']]}};
+const CODE={wh:'KIT',smt1:'SMT1',smt2:'SMT2',mold:'MOLD',asm3:'ASM3',eol:'EOL',pack:'PACK'};
+function weekHTML(){const L=lsw(),ini={supervisor:'S',engineer:'E',manager:'M'},ico={done:'✓',missed:'✗',due:'●',plan:''};
+ return `<div class="card hweek"><div class="zh"><h2>This week's walks</h2><a class="linkb" href="#${ROLE}-sched">Full schedule →</a></div>
+ <p class="note" style="margin:4px 0 8px">${L.done} of ${L.due} done${L.missed?` · <span class="hi">${L.missed} missed</span>`:''} · S Supervisor · E Engineer · M Manager</p>
+ <div class="wk">${DAYN.map((d,di)=>`<div class="wkd${di===TDOW?' now':''}"><b>${d}</b>${L.c.filter(x=>x.di===di).map(x=>`<button type="button" class="wkc ${x.st}" data-sc="${x.st==='done'?'v:'+x.w.id:x.st==='plan'?'':'s:'+x.ar+':'+x.role}" ${x.st==='plan'?'disabled':''} aria-label="${d}: ${esc(A[x.ar].short)}, ${ROLE_NAMES[x.role]}, ${({done:'done',missed:'missed',due:'due today',plan:'planned'})[x.st]}"><span>${CODE[x.ar]||esc(A[x.ar].short)}</span><small>${ini[x.role]} ${ico[x.st]}</small></button>`).join('')}</div>`).join('')}</div></div>`}
+function renderHome(){const h=$('#home');if(!h)return;const hr=new Date().getHours(),gr=hr<12?'Good morning':hr<18?'Good afternoon':'Good evening',
+ top=RANKED()[0].a,open=OBS.filter(o=>o.status==='open'),late=open.filter(overdue).length,bn=[...AREAS].sort((x,y)=>flow(y)-flow(x))[0],
+ go={supervisor:['map','Open the walk route'],engineer:['repeat','See repeat issues'],manager:['score','See the score']}[ROLE];
+ const tile=(href,ic,t,s,cls,attr)=>`<a class="tile ${cls||''}" href="${href}" ${attr||''}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="${IC[ic]}"/></svg><b>${t}</b><small>${s}</small></a>`;
+ h.innerHTML=`<div class="hero"><p class="note">${gr} · ${new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'})} · shift ${shiftNow()}</p>
+  <div class="seg hroles" role="radiogroup" aria-label="I work as">${ROLES.map(r=>`<button type="button" role="radio" data-hr="${r}" aria-checked="${r===ROLE}">${ROLE_NAMES[r]}</button>`).join('')}</div></div>
+ ${weekHTML()}
+ <div class="tiles">${tile('#'+ROLE+'-map','map','Plant map',`Bottleneck: ${esc(bn.short)}`)}
+  ${tile('#'+ROLE+'-gwalk','walk',WCUR?'Continue walk':'Start Gemba walk',WCUR?`${esc(A[WCUR.area].short)} · in progress`:`Suggested: ${esc(top.short)}`,'acc',WCUR?'':`data-walk="${top.id}"`)}
+  ${tile('#'+ROLE+'-capture','plus','Capture','Problem, good practice or idea')}
+  ${tile('#'+ROLE+'-actions','check','Action plan',`${open.length} open${late?` · <span class="hi">${late} late</span>`:''}`)}</div>
+ <div class="card hfocus"><span class="tag" style="color:var(--steel)">Today</span><h2>${esc($('#title').textContent)}</h2><p class="note" style="margin:6px 0 12px">${esc($('#sub').textContent)}</p><a class="btnlike solid" href="#${ROLE}-${go[0]}">${go[1]} →</a></div>
+ <div class="kv hkpi">${HOME_KPI[ROLE]().map(([t,v,c,s])=>`<a href="#${ROLE}-${s}"><small>${t}</small><b class="${c}">${v}</b></a>`).join('')}<a href="#${ROLE}-history" class="hk-wide"><b>Walk history</b><small>${allWalks().filter(w=>w.at>=T0-14*DAY).length} walks in the last 14 days · open reports →</small></a></div>
+ <div class="card"><h2>All sections · ${ROLE_NAMES[ROLE]}</h2><nav class="hlinks">${SECS()[ROLE].filter(x=>x[0]!=='home'&&x[0]!=='capture').map(([k,t,ic,hint])=>`<a href="#${ROLE}-${k}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="${IC[ic]}"/></svg><span>${esc(t)}</span><small>${esc(hint)}</small></a>`).join('')}<a href="#" id="h-reset"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="${IC.reset}"/></svg><span>Reset demo data</span><small></small></a></nav></div>`;
+ $$('#home [data-hr]').forEach(b=>b.onclick=()=>{location.hash=b.dataset.hr+'-home'});
+ $$('#home .wkc[data-sc]').forEach(b=>b.onclick=()=>{const v=b.dataset.sc;if(!v)return;if(v[0]==='v'){openHist(v.slice(2))}else{const[,ar,role]=v.split(':');startSetup(ar,role)}});
+ $('#h-reset').onclick=e=>{e.preventDefault();$('#resetDemo').click();window.scrollTo(0,0)}}
+function renderBnav(){const n=$('#bnav');if(!n)return;const od=OBS.filter(overdue).length;
+ n.innerHTML=BN.map(([k,t,ic])=>`<a href="#${ROLE}-${k}" class="${k==='gwalk'?'plus':''}" ${SEC===k?'aria-current="page"':''}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="${IC[ic]}"/></svg><span>${t}</span>${k==='actions'&&od?`<span class="bdg" aria-label="${od} late">${od}</span>`:''}${k==='gwalk'&&WCUR?'<span class="bdg" style="background:var(--acc);color:var(--accInk);top:-18px" aria-label="in progress">●</span>':''}</a>`).join('');
+ document.body.classList.toggle('walking',SEC==='gwalk'&&!!WCUR&&!VIEW);
+ const dl=$('#owners')||document.body.appendChild(Object.assign(document.createElement('datalist'),{id:'owners'}));dl.innerHTML=[...new Set(OBS.map(o=>o.owner).filter(x=>x&&x!=='Unassigned'))].slice(-12).map(o=>`<option value="${esc(o)}">`).join('')}
+
+function renderActive(box){const w=WCUR,a=A[w.area],T=THEMES[w.theme],sc=score(w),nAns=Object.keys(w.ans).length,qmode=w.step===0&&innerWidth<760&&(w.qi||0)<T.q.length;
+ box.innerHTML=`<div class="card" style="max-width:820px"><div class="zh"><h2>${esc(T.n)} · ${esc(a.name)}</h2><span class="pill" style="color:var(--steel)">${mins(w)} min</span></div>
+ <p class="note" style="margin:4px 0 10px">Shift ${esc(w.shift)} · ${ROLE_NAMES[w.role]} · started ${dstr(w.at)} · <button type="button" class="linkb" id="w-cancel" style="color:var(--red)">${CANCEL?'Tap again to cancel':'Cancel walk'}</button></p>
+ <ol class="steps">${STEPS.map((s,i)=>`<li><button type="button" data-st="${i}" ${i===w.step?'aria-current="step"':''} class="${i<w.step?'done':''}"><span>${i+1}</span>${s}</button></li>`).join('')}</ol>
+ <div id="w-body"></div>
+ <div class="btns wbar ${w.step>0||qmode?'':'one'}">${qmode?`${(w.qi||0)>0?'<button type="button" class="ghost" id="w-qb">Previous</button>':'<span></span>'}<button type="button" id="w-qn">${w.ans[w.qi||0]?'Next check':'Skip check'}</button>`:`${w.step>0?'<button type="button" class="ghost" id="w-back">Back</button>':''}${w.step<3?`<button type="button" id="w-next">Next: ${STEPS[w.step+1]}</button>`:'<button type="button" id="w-fin">Finish walk</button>'}`}</div></div>`;
+ if($('#w-qn'))$('#w-qn').onclick=()=>{w.qi=(w.qi||0)+1;saveCur();renderWalk()};
+ if($('#w-qb'))$('#w-qb').onclick=()=>{w.qi=Math.max(0,(w.qi||0)-1);saveCur();renderWalk()};
+ $$('.steps [data-st]').forEach(b=>b.onclick=()=>{w.step=+b.dataset.st;saveCur();renderWalk()});
+ if($('#w-back'))$('#w-back').onclick=()=>{w.step--;saveCur();renderWalk();window.scrollTo(0,0)};
+ if($('#w-next'))$('#w-next').onclick=()=>{w.step++;saveCur();renderWalk();window.scrollTo(0,0)};
+ if($('#w-fin'))$('#w-fin').onclick=finishWalk;
+ $('#w-cancel').onclick=()=>{if(CANCEL){WCUR=null;CANCEL=0;try{localStorage.removeItem('giq_wcur')}catch(e){}renderWalk();renderMenuOnly();renderBnav();return}CANCEL=1;renderWalk();setTimeout(()=>{if(CANCEL){CANCEL=0;if(WCUR)renderWalk()}},4000)};
+ const body=$('#w-body');
+ if(w.step===0&&innerWidth<760){const n=T.q.length,qi=Math.min(w.qi||0,n);
+  if(qi>=n){body.innerHTML=`<p style="margin:0">All ${n} checks answered${sc!==null?`: <strong>${pct(sc)} OK</strong>`:''}. Tap a check to change it.</p><ul class="qsum">${T.q.map((q,i)=>`<li><button type="button" data-qi="${i}"><span>${i+1}. ${esc(q[0])}</span><strong class="${w.ans[i]==='n'?'hi':w.ans[i]==='y'?'lo':''}">${({y:'Yes',n:'No',na:'N/A'})[w.ans[i]]||'–'}</strong></button></li>`).join('')}</ul>`}
+  else{const q=T.q[qi],v=w.ans[qi];
+   body.innerHTML=`<div class="qprog"><span>Check ${qi+1} of ${n}</span><span>${nAns} answered${sc!==null?' · '+pct(sc)+' OK':''}</span></div><div class="prog"><i style="width:${nAns/n*100}%"></i></div>
+   <div class="qnav" role="group" aria-label="Checks">${T.q.map((_,i)=>`<button type="button" data-qi="${i}" class="${w.ans[i]==='n'?'no':w.ans[i]?'ok':''}" ${i===qi?'aria-current="step"':''} aria-label="Check ${i+1}${w.ans[i]?', answered':''}">${i+1}</button>`).join('')}</div>
+   <p class="qbig" id="qtxt">${esc(q[0])}</p>
+   <div class="yn" role="group" aria-labelledby="qtxt">${[['y','Yes'],['n','No'],['na','N/A']].map(([k,l])=>`<button type="button" data-v="${k}" aria-pressed="${v===k}">${l}</button>`).join('')}</div>
+   ${v==='n'?nofixHTML(w,qi):''}`;
+   $$('#w-body .yn [data-v]').forEach(b=>b.onclick=()=>{const k=b.dataset.v;w.ans[qi]=k;buzz();saveCur();if(k==='n'){renderWalk();const f=$('#wn'+qi);if(f)f.focus()}else{renderWalk();setTimeout(()=>{if(WCUR===w&&w.step===0&&(w.qi||0)===qi){w.qi=qi+1;saveCur();renderWalk()}},220)}});
+   bindNofix(w)}
+  $$('#w-body [data-qi]').forEach(b=>b.onclick=()=>{w.qi=+b.dataset.qi;saveCur();renderWalk()})}
+ else if(w.step===0){body.innerHTML=`<p style="margin:0 0 8px">${esc(T.why)} <span class="note">· ${nAns} of ${T.q.length} answered${sc!==null?` · score <strong>${pct(sc)}</strong>`:''}</span></p><ol class="chk">${T.q.map((q,i)=>{const v=w.ans[i];return `<li class="${v==='n'?'no':''}"><div class="q">${esc(q[0])}</div><div class="seg" role="group" aria-label="${esc(q[0])}">${[['y','Yes'],['n','No'],['na','N/A']].map(([k,l])=>`<button type="button" data-q="${i}" data-v="${k}" aria-pressed="${v===k}">${l}</button>`).join('')}</div>
+  ${v==='n'?nofixHTML(w,i):''}</li>`}).join('')}</ol>`;
+  $$('#w-body [data-q]').forEach(b=>b.onclick=()=>{const i=b.dataset.q;buzz();w.ans[i]=w.ans[i]===b.dataset.v?undefined:b.dataset.v;if(!w.ans[i])delete w.ans[i];saveCur();renderWalk();const f=$(`#w-body [data-q="${i}"][data-v="${b.dataset.v}"]`);if(f)f.focus()});
+  bindNofix(w)}
+ if(w.step===1){const K=w._k||'concern';body.innerHTML=`<div class="asks"><strong>Ask the team</strong> ${ASK.map(q=>`<span class="chip">${esc(q)}</span>`).join('')}</div>
+  <label>Type</label><div class="seg" id="wo-k" role="group" aria-label="Observation type">${Object.entries(OKIND).map(([k,v])=>`<button type="button" data-k="${k}" aria-pressed="${k===K}">${v[0]}</button>`).join('')}</div>
+  <label for="wo-t">${K==='good'?'What works well here?':K==='idea'?'What is the idea?':'What did you see?'}</label><textarea id="wo-t" placeholder="${K==='good'?'e.g. Shadow board at station 4 is complete and used':K==='idea'?'e.g. Move the label printer next to the test bench':'e.g. Boards wait on the cart before AOI'}">${esc(w._t||'')}</textarea><div class="guard" id="wo-g" hidden></div>
+  <div class="btns" style="margin-top:8px"><label class="ghost btnlike" for="wo-cam">${CAM}Photo</label><input type="file" id="wo-cam" accept="image/*" capture="environment" hidden><label class="ghost btnlike" for="wo-gal">${GAL}Gallery</label><input type="file" id="wo-gal" accept="image/*" multiple hidden><span class="note" id="wo-s" role="status"></span></div>
+  <div class="thumbs" id="wo-ph">${(w._ph||[]).map((p,i)=>`<span class="thw"><img src="${esc(p.src)}" alt="Photo ${i+1}"></span>`).join('')}</div>
+  <div class="btns"><button type="button" id="wo-add">Add to walk</button></div>
+  <h3 style="margin-top:18px">This walk so far (${w.obs.length})</h3>${w.obs.length?`<ul class="olist">${w.obs.map((o,i)=>`<li><span class="tag ${OKIND[o.k][1]}">${OKIND[o.k][0]}</span> ${esc(o.text)}${o.photos&&o.photos.length?` <span class="note">· ${o.photos.length} photo${o.photos.length>1?'s':''}</span>`:''} <button type="button" class="linkb" data-rm="${i}" aria-label="Remove: ${esc(o.text)}">Remove</button></li>`).join('')}</ul><p class="note">Concerns and waste become actions when you finish. Good practice and ideas are shared on the board.</p>`:'<p class="empty">Nothing yet. Good practice counts too.</p>'}`;
+  $$('#wo-k [data-k]').forEach(b=>b.onclick=()=>{w._k=b.dataset.k;w._t=$('#wo-t').value;renderWalk()});
+  const ta=$('#wo-t');ta.oninput=()=>{w._t=ta.value};bindGuard(ta,$('#wo-g'));
+  for(const id of ['wo-cam','wo-gal'])$('#'+id).onchange=async e=>{$('#wo-s').textContent='Saving photo…';w._ph=w._ph||[];await addPhotos(e.target.files,w._ph,'before');w._t=$('#wo-t').value;renderWalk()};
+  $('#wo-add').onclick=()=>{const t=ta.value.trim();if(!t){ta.focus();return}w.obs.push({k:K,text:t,photos:w._ph||[]});w._t='';w._ph=[];saveCur();renderWalk();toast('Added to the walk.')};
+  $$('#w-body [data-rm]').forEach(b=>b.onclick=()=>{w.obs.splice(+b.dataset.rm,1);saveCur();renderWalk()})}
+ if(w.step===2){const L=w.ts.laps,n=L.length,avg=n?L.reduce((x,y)=>x+y,0)/n:0,mn=n?Math.min(...L):0,mx=n?Math.max(...L):0,vr=n>1?(mx-mn)/avg:0;
+  body.innerHTML=`<p style="margin:0 0 6px">Time 5–10 cycles at the station. Tap <strong>Lap</strong> each time one unit is finished. <span class="note">Standard cycle ${a._b.ct} s · takt ${TAKT} s</span></p>
+  <div class="clock" id="ts-c" aria-live="off">${TS0?'…':'0.0'} s</div>
+  <div class="btns"><button type="button" class="lap" id="ts-go">${TS0?'Lap · unit done':'Start timing'}</button>${TS0?'<button type="button" class="ghost" id="ts-stop">Stop</button>':''}${n?'<button type="button" class="ghost" id="ts-clr">Clear</button>':''}</div>
+  ${n?`<div class="kv" style="margin-top:12px"><div><small>Cycles timed</small><b>${n}</b></div><div><small>Average</small><b class="${avg>=TAKT?'hi':avg>=TAKT*.95?'mid':'lo'}">${avg.toFixed(1)} s</b></div><div><small>Min · max</small><b>${mn.toFixed(1)} · ${mx.toFixed(1)}</b></div><div><small>Variation</small><b class="${vr>.15?'mid':'lo'}">${pct(vr)}</b></div></div>
+  <p style="margin:10px 0 0">${avg>=TAKT?`<strong class="hi">Above takt.</strong> This station cannot keep pace: it is a bottleneck. Look at waiting and motion first.`:avg>=TAKT*.95?`<strong class="mid">Close to takt.</strong> Little margin: any stop will cost output.`:`<strong class="lo">Under takt.</strong> The station keeps pace.`} ${vr>.15?'The cycles are uneven (Mura): check if the method is the same every time.':''}</p>
+  <p class="note">${L.map((x,i)=>`#${i+1} ${x.toFixed(1)} s`).join(' · ')}</p>
+  ${ctOk(a,avg)?'':`<p class="guard">The average is far from the standard cycle (${a._b.ct} s). Check the timing before it is used on the map.</p>`}<label class="ck"><input type="checkbox" id="ts-use" ${w.ts.use&&n>=3&&ctOk(a,avg)?'checked':''} ${n<3||!ctOk(a,avg)?'disabled':''}> Use the average as the current cycle time of ${esc(a.short)} (needs 3 or more cycles)</label>`:'<p class="note">Optional step. Skip it with Next if there is no time.</p>'}`;
+  if(TS0){LAST=LAST||TS0;TIMER=setInterval(()=>{const c=$('#ts-c');if(c)c.textContent=((performance.now()-LAST)/1000).toFixed(1)+' s';else stopTimer()},100)}
+  $('#ts-go').onclick=()=>{const now=performance.now();buzz();if(!TS0){TS0=LAST=now}else{L.push(Math.round((now-LAST)/100)/10);LAST=now;saveCur()}renderWalk()};
+  if($('#ts-stop'))$('#ts-stop').onclick=()=>{TS0=LAST=null;renderWalk()};
+  if($('#ts-clr'))$('#ts-clr').onclick=()=>{w.ts.laps=[];TS0=LAST=null;saveCur();renderWalk()};
+  if($('#ts-use'))$('#ts-use').onchange=e=>{w.ts.use=e.target.checked;saveCur()}}
+ if(w.step===3){const no=Object.values(w.ans).filter(v=>v==='n').length,acts=Object.entries(w.ans).filter(([i,v])=>v==='n'&&w.act[i]!==false).length+w.obs.filter(o=>o.k==='concern'||o.k==='waste').length;
+  body.innerHTML=`<div class="gstd"><div><b>Go</b>${esc(a.name)}, shift ${esc(w.shift)}, ${mins(w)} min</div><div><b>See</b>${nAns} checks${sc!==null?`, ${pct(sc)} OK`:''} · ${no} not OK · ${w.obs.length} observation${w.obs.length===1?'':'s'}${w.ts.laps.length?` · ${w.ts.laps.length} cycles timed`:''}</div></div>
+  <label for="r-think"><b>Think</b>: what surprised you? What is the biggest gap, and why does it happen?</label><textarea id="r-think">${esc(w.refl.think||'')}</textarea><div class="guard" id="r-g" hidden></div>
+  <label for="r-do"><b>Do</b>: what will you follow up, and by when?</label><textarea id="r-do" placeholder="e.g. Check the first-piece checklist with the shift leader on Thursday">${esc(w.refl.do||'')}</textarea>
+  <label class="ck"><input type="checkbox" id="r-thx" ${w.thanked?'checked':''}> I thanked the team and told them what happens next</label>
+  <p class="note">Finishing creates <strong>${acts}</strong> action${acts===1?'':'s'} in the Action plan and saves the walk report.</p>`;
+  const th=$('#r-think');th.oninput=()=>{w.refl.think=th.value;saveCur()};bindGuard(th,$('#r-g'));
+  $('#r-do').oninput=e=>{w.refl.do=e.target.value;saveCur()};$('#r-thx').onchange=e=>{w.thanked=e.target.checked;saveCur()}}}
+function finishWalk(){const w=WCUR,T=THEMES[w.theme];
+ if(!Object.keys(w.ans).length&&!w.obs.length){w.step=0;saveCur();renderWalk();toast('Answer at least one check or add one observation first.');return}
+ if(!(w.refl.do||'').trim()){toast('Write one follow-up under Do: a walk without a next step is a tour.');$('#r-do').focus();return}
+ w.end=Date.now();w.acts=[];
+ T.q.forEach((q,i)=>{if(w.ans[i]==='n'&&w.act[i]!==false){const id=newId(),nt=(w.note[i]||'').trim();OBS.push({id,wk:0,area:w.area,shift:w.shift,cat:q[1],trig:'none',text:`Check not OK: ${q[0]}${nt?' – '+nt:''}`,owner:(w.own[i]||'').trim()||'Area lead',due:3,status:'open',eff:'pending',std:'n/a',photos:[],src:'walk'});w.acts.push(id)}});
+ w.obs.forEach(o=>{if(o.k==='concern'||o.k==='waste'){const id=newId();OBS.push({id,wk:0,area:w.area,shift:w.shift,cat:classify(o.text),trig:trigOf(o.text),text:o.text,owner:'Area lead',due:3,status:'open',eff:'pending',std:'n/a',photos:o.photos||[],gb:true,src:'walk'});w.acts.push(id)}
+  else NOTES.push({id:newId(),at:Date.now(),area:w.area,shift:w.shift,k:o.k,text:o.text,photos:o.photos||[],by:w.role})});
+ const L=w.ts.laps;if(w.ts.use&&L.length>=3&&ctOk(A[w.area],L.reduce((x,y)=>x+y,0)/L.length)){CTO[w.area]=Math.round(L.reduce((x,y)=>x+y,0)/L.length*10)/10;persist('ct',CTO)}
+ delete w._k;delete w._t;delete w._ph;delete w.step;delete w.qi;
+ WALKS.push(w);WCUR=null;try{localStorage.removeItem('giq_wcur')}catch(e){}
+ persist('walks',WALKS);persist('notes',NOTES);saveObs();applyWalks();VIEW=w.id;TS0=LAST=null;renderAll();window.scrollTo(0,0);toast(`Walk saved. ${w.acts.length} action${w.acts.length===1?'':'s'} created.`)}
+function reportHTML(w,ui){const a=A[w.area],T=THEMES[w.theme],sc=score(w),acts=(w.acts||[]).map(id=>OBS.find(o=>o.id==id)).filter(Boolean),L=(w.ts&&w.ts.laps)||[],avg=L.length?L.reduce((x,y)=>x+y,0)/L.length:0;
+ return `<div class="card rep" style="max-width:820px"><div class="zh"><h2>Walk report · ${esc(a.name)}</h2>${sc!==null?`<span class="pill ${sc<.7?'hi':sc<.85?'mid':'lo'}">${pct(sc)} OK</span>`:''}</div>
+ <p class="note" style="margin:4px 0 12px">${esc(T.n)} · ${dstr(w.at)} · ${mins(w)} min · shift ${esc(w.shift)} · ${ROLE_NAMES[w.role]}${w.seed?' · recorded walk (demo)':''}</p>
+ <div class="gstd"><div><b>Go</b>${esc(a.name)}</div><div><b>See</b>${Object.keys(w.ans).length} checks · ${(w.obs||[]).length} observations</div>${w.refl&&w.refl.think?`<div><b>Think</b>${esc(w.refl.think)}</div>`:''}${w.refl&&w.refl.do?`<div><b>Do</b>${esc(w.refl.do)}</div>`:''}</div>
+ <h3 style="margin-top:14px">Checklist</h3><table class="stack"><thead><tr><th>Check</th><th>Result</th><th>Note</th></tr></thead><tbody>${T.q.map((q,i)=>{const v=w.ans[i];return `<tr><td>${esc(q[0])}</td><td class="${v==='n'?'hi':v==='y'?'lo':''}">${v==='y'?'Yes':v==='n'?'No':v==='na'?'N/A':'–'}</td><td>${esc((w.note&&w.note[i])||'')}</td></tr>`}).join('')}</tbody></table>
+ ${(w.obs||[]).length?`<h3 style="margin-top:14px">Observations</h3><ul class="olist">${w.obs.map(o=>`<li><span class="tag ${OKIND[o.k][1]}">${OKIND[o.k][0]}</span> ${esc(o.text)}</li>`).join('')}</ul>`:''}
+ ${L.length?`<h3 style="margin-top:14px">Time study</h3><p style="margin:4px 0">${L.length} cycles · average <strong>${avg.toFixed(1)} s</strong> vs takt ${TAKT} s · min ${Math.min(...L).toFixed(1)} · max ${Math.max(...L).toFixed(1)}</p>`:''}
+ <h3 style="margin-top:14px">Actions created (${acts.length})</h3>${acts.length?`<ul class="olist">${acts.map(o=>`<li>${esc(o.text)} <span class="note">· ${esc(o.owner)} · ${o.status==='open'?dueTxt(o):'closed'}</span></li>`).join('')}</ul>`:'<p class="empty">None.</p>'}
+ ${w.seed?'':`<p class="note">${w.thanked?'✓ Team thanked and told what happens next.':'Team not yet thanked.'}</p>`}
+ ${ui?`<div class="btns noprint"><button type="button" id="rp-print">Print / save as PDF</button><button type="button" class="ghost" id="rp-copy">Copy summary</button><button type="button" class="ghost" id="rp-new">New walk</button></div>`:''}</div>`}
+function repText(w){const a=A[w.area],T=THEMES[w.theme],sc=score(w),acts=(w.acts||[]).map(id=>OBS.find(o=>o.id==id)).filter(Boolean);
+ return [`Gemba walk – ${a.name} – ${T.n}`,`${dstr(w.at)}, ${mins(w)} min, shift ${w.shift}, ${ROLE_NAMES[w.role]}`,sc!==null?`Checklist: ${pct(sc)} OK`:'',...T.q.map((q,i)=>w.ans[i]?`- ${q[0]}: ${({y:'Yes',n:'No',na:'N/A'})[w.ans[i]]}${w.note&&w.note[i]?' ('+w.note[i]+')':''}`:'').filter(Boolean),...(w.obs||[]).map(o=>`* ${OKIND[o.k][0]}: ${o.text}`),w.refl&&w.refl.think?`Think: ${w.refl.think}`:'',w.refl&&w.refl.do?`Do: ${w.refl.do}`:'',acts.length?`Actions: ${acts.map(o=>o.text+' ('+o.owner+')').join('; ')}`:''].filter(Boolean).join('\n')}
+function bindReport(w,root){const q=s=>root.querySelector(s);q('#rp-print').onclick=()=>{let z=$('#printzone');if(!z){z=document.createElement('div');z.id='printzone';document.body.appendChild(z)}z.innerHTML=reportHTML(w,false);document.body.classList.add('printing');window.print()};
+ q('#rp-copy').onclick=async()=>{const t=repText(w);try{await navigator.clipboard.writeText(t);toast('Summary copied. Paste it in an e-mail or chat.')}catch(e){const x=document.createElement('textarea');x.value=t;document.body.appendChild(x);x.select();try{document.execCommand('copy');toast('Summary copied.')}catch(e2){toast('Copy is not allowed here.')}x.remove()}};
+ q('#rp-new').onclick=()=>{VIEW=null;HVIEW=null;SETUP={area:w.area,theme:null,role:ROLE};if(SEC==='gwalk')renderWalk();else location.hash=ROLE+'-gwalk'}}
+addEventListener('afterprint',()=>document.body.classList.remove('printing'));
+function openHist(id){HVIEW=id;if(SEC!=='history')location.hash=ROLE+'-history';else{renderHist();}requestAnimationFrame(()=>{const r=$('#hist-rep');if(r&&!r.hidden)r.scrollIntoView({block:'start',behavior:'smooth'})})}
+function renderHist(){const h=$('#gw-hist');if(!h)return;const R=$('#hist-rep'),hw=HVIEW&&allWalks().find(x=>x.id==HVIEW);
+ if(hw){R.hidden=false;R.innerHTML=reportHTML(hw,true).replace('<button type="button" class="ghost" id="rp-new">New walk</button>','<button type="button" class="ghost" id="rp-new">New walk here</button><button type="button" class="ghost" id="rp-close">Close</button>');bindReport(hw,R);R.querySelector('#rp-close').onclick=()=>{HVIEW=null;renderHist();window.scrollTo(0,0)}}else{R.hidden=true;R.innerHTML=''}const l=allWalks().filter(w=>w.at>=T0-14*DAY);
+ if(innerWidth<600){h.innerHTML=l.length?`<ul class="hlist">${l.map(w=>{const s=score(w);return `<li><button type="button" data-v="${w.id}" class="${w.id==HVIEW?'sel':''}"><span><b>${esc(A[w.area].short)}</b> · ${esc(THEMES[w.theme].n)}<small>${dstr(w.at)} · ${ROLE_NAMES[w.role]}${(w.acts||[]).length?` · ${w.acts.length} action${w.acts.length>1?'s':''}`:''}</small></span><strong class="${s===null?'':s<.7?'hi':s<.85?'mid':'lo'}">${s===null?'–':pct(s)}</strong></button></li>`}).join('')}</ul>`:'<p class="empty">No walks in the last 14 days.</p>';$$('#gw-hist [data-v]').forEach(r=>r.onclick=()=>openHist(r.dataset.v));return}
+ h.innerHTML=`<table class="stack"><thead><tr><th>When</th><th>Area</th><th>Focus</th><th>By</th><th class="n">Score</th><th class="n">Actions</th></tr></thead><tbody>${l.map(w=>{const s=score(w);return `<tr data-v="${w.id}" style="cursor:pointer" class="${w.id==HVIEW?'bn':''}"><td>${dstr(w.at)}</td><td>${esc(A[w.area].short)}</td><td>${esc(THEMES[w.theme].n)}</td><td>${ROLE_NAMES[w.role]}</td><td class="n ${s===null?'':s<.7?'hi':s<.85?'mid':'lo'}">${s===null?'–':pct(s)}</td><td class="n">${(w.acts||[]).length||'–'}</td></tr>`}).join('')||'<tr><td colspan="6" class="empty">No walks in the last 14 days.</td></tr>'}</tbody></table>`;
+ $$('#gw-hist tr[data-v]').forEach(r=>r.onclick=()=>openHist(r.dataset.v))}
+/* good practice & ideas */
+function renderNotes(){const b=$('#c-notes');if(!b)return;const l=[...NOTES].sort((x,y)=>y.at-x.at).slice(0,12);
+ b.innerHTML=l.length?`<ul class="olist">${l.map(n=>`<li><span class="tag ${OKIND[n.k][1]}">${OKIND[n.k][0]}</span> ${esc(n.text)} <span class="note">· ${esc(A[n.area].short)} · ${dstr(n.at)}</span>${thumbs(n,true)}</li>`).join('')}</ul>`:'<p class="empty">None yet. Record what works well, so it can be copied to other areas.</p>'}
+/* capture: type + guard */
+let CAPK='concern';
+function renderCapK(){$('#c-kind').innerHTML=Object.entries(OKIND).map(([k,v])=>`<button type="button" data-k="${k}" aria-pressed="${k===CAPK}">${v[0]}</button>`).join('');$$('#c-kind button').forEach(b=>b.onclick=()=>{CAPK=b.dataset.k;renderCapK()});
+ const nt=CAPK==='good'||CAPK==='idea';$('#cap button[type=submit]').textContent=nt?'Save':'Analyse';$('label[for=c-text]').textContent=CAPK==='good'?'What works well here?':CAPK==='idea'?'What is the idea?':'What did you see?';if(nt)$('#c-sugg').hidden=true}
+renderCapK();bindGuard($('#c-text'),$('#c-guard'));
+{const orig=$('#cap').onsubmit;$('#cap').onsubmit=e=>{if(CAPK==='good'||CAPK==='idea'){e.preventDefault();const t=$('#c-text').value.trim();if(!t){$('#c-text').focus();return}
+ NOTES.push({id:newId(),at:Date.now(),area:$('#c-area').value,shift:$('#c-shift').value,k:CAPK,text:t,photos:DRAFT_PH.slice(),by:ROLE});DRAFT_PH=[];renderDraftPh();$('#c-text').value='';$('#c-guard').hidden=true;persist('notes',NOTES);renderNotes();toast(CAPK==='good'?'Good practice saved.':'Idea saved.');return}
+ orig(e)}}
+function renderMenuOnly(){buildMenu()}
+function renderFeat(){renderWalk();renderHist();renderSched();renderNotes();
+ const m=$('#m-next');if(m){const L=lsw();m.insertAdjacentHTML('beforeend',`<li style="margin-bottom:8px"><strong>Leader standard work</strong>: ${L.done} of ${L.due} planned walks done this week${L.missed?`, ${L.missed} missed. Open the walk schedule to plan them.`:'.'}</li>`)}}
+
+function route(){let[r,sec]=location.hash.slice(1).split('-');if(!ROLES.includes(r))r=ROLES.includes(ls.get('giq_role',''))?ls.get('giq_role',''):'supervisor';ls.set('giq_role',r);const secs=SECS()[r];if(!secs.some(x=>x[0]===sec))sec='home';
+ const changed=r!==ROLE||LAYER===null;if(sec==='capture'&&SEC!=='capture')$('#c-shift').value=shiftNow();ROLE=r;SEC=sec;if(changed)LAYER=DEF_LAYER[r];
+ $$('.sec').forEach(x=>{x.hidden=!((x.dataset.role===ROLE||x.dataset.role==='all')&&x.dataset.sec===SEC)});
+ renderAll();
+ if(pendingScroll){pendingScroll=false;requestAnimationFrame(()=>$('#zone').scrollIntoView({block:'start',behavior:'smooth'}))}else window.scrollTo(0,0)}
+window.addEventListener('hashchange',route);
+{let was=null,wk=innerWidth<600;new ResizeObserver(()=>{const n=($('#map').clientWidth||innerWidth)<560;if(was!==null&&n!==was)renderMap();was=n}).observe($('#map'));addEventListener('resize',()=>{const n=innerWidth<600;if(n!==wk){wk=n;renderKanban()}})}
+route();
+}
+</script>
+</body>
+</html>
