@@ -1096,7 +1096,12 @@ function guardHTML(t){return BLAME.test(t||'')?`<strong>Process, not person.</st
 function bindGuard(ta,box){const f=()=>{const h=guardHTML(ta.value);box.innerHTML=h;box.hidden=!h};ta.addEventListener('input',f);f()}
 const IMAI=[['Go to gemba','Go to the place where it happened.'],['Check gembutsu','Look at the real part, machine or record.'],['Contain now','Take a temporary countermeasure on the spot.'],['Find root cause','Ask why until you reach the cause.'],['Standardize','Change the standard so it does not come back.']];
 function imai(o){const legacy=o.id<1000&&o.status!=='open';return[true,!!(o.gb||(o.photos||[]).some(p=>p.t!=='after')||legacy),!!(o.cont||legacy),!!(o.root||legacy),o.std==='done']}
-const ROTA=[[['eol','supervisor'],['smt1','supervisor'],['mold','engineer']],[['asm3','supervisor'],['smt2','supervisor'],['eol','engineer']],[['mold','supervisor'],['pack','supervisor'],['eol','manager']],[['wh','supervisor'],['smt1','supervisor'],['asm3','engineer']],[['eol','supervisor'],['smt2','supervisor'],['mold','manager']]];
+const ROTA=(()=>{const byRisk=[...AREAS].sort((x,y)=>risk(y).score-risk(x).score).map(a=>a.id),rows=[];
+ for(let di=0;di<5;di++){const back=TDOW-di,pool=back>0?AREAS.filter(a=>a.walk<=back).map(a=>a.id):byRisk,pick=[];
+  for(let j=0;pick.length<3&&j<pool.length*3;j++){const id=pool[(di*2+j)%pool.length];if(!pick.includes(id))pick.push(id)}
+  if(back<=0)for(const id of byRisk){if(pick.length>=3)break;if(!pick.includes(id))pick.push(id)}
+  rows.push(pick.map((id,j)=>[id,j<2?'supervisor':di%2?'engineer':'manager']))}
+ return rows})();
 /* data */
 const okWalk=w=>w&&typeof w==='object'&&A[w.area]&&THEMES[w.theme]&&typeof w.at==='number';
 let WALKS=(ls.get('giq_walks',[])||[]).filter(okWalk),NOTES=(ls.get('giq_notes',[])||[]).filter(n=>n&&A[n.area]&&OKIND[n.k]),CTO=ls.get('giq_ct',{})||{},WCUR=ls.get('giq_wcur',null),VIEW=null,HVIEW=null;
@@ -1104,7 +1109,7 @@ if(WCUR&&!okWalk(WCUR))WCUR=null;
 function persist(k,v){ls.set('giq_'+k,v);if(k!=='wcur'&&typeof SERVER!=='undefined'&&SERVER)api('api/kv/'+k,'PUT',v)}
 const SEEDW=(()=>{let s=7;const rnd=()=>(s=(s*16807)%2147483647)/2147483647,th=Object.keys(THEMES),out=[];
  for(let back=1;back<=11;back++){const day=T0-back*DAY,dow=(new Date(day).getDay()+6)%7;if(dow>4)continue;
-  ROTA[dow].forEach(([ar,role],j)=>{const a=A[ar];if(back<a.walk||rnd()<.1)return;const theme=j===0?suggestTheme(a)[0]:th[Math.floor(rnd()*th.length)],n=THEMES[theme].q.length,ans={};
+  ROTA[dow].forEach(([ar,role],j)=>{const a=A[ar];const r0=rnd();if(back<a.walk||(back>=7&&r0<.12)||(back===TDOW&&TDOW>=2&&j===2))return;const theme=j===0?suggestTheme(a)[0]:th[Math.floor(rnd()*th.length)],n=THEMES[theme].q.length,ans={};
    for(let i=0;i<n;i++)ans[i]=rnd()<.78?'y':rnd()<.8?'n':'na';out.push({id:'s'+back+j,seed:true,at:day+(8+j*2)*36e5,end:day+(8+j*2)*36e5+(15+Math.floor(rnd()*20))*6e4,area:ar,shift:'A',role,theme,ans,note:{},obs:[],ts:{laps:[]},refl:{},acts:[]})})}
  return out})();
 const allWalks=()=>[...SEEDW,...WALKS].sort((x,y)=>y.at-x.at);
